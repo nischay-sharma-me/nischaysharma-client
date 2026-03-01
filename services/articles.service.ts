@@ -48,13 +48,14 @@ export const articlesService = {
     });
   },
 
-  listArticles: (status?: string) => {
+  listArticles: (status?: string, token?: string) => {
     const queryParams = new URLSearchParams();
     if (status) queryParams.append('status', status);
     
     const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
-    return apiFetch<any>(`/articles${queryString}`, {
+    return apiFetch<{ success: boolean, data: Article[] }>(`/articles${queryString}`, {
       method: 'GET',
+      token,
     });
   },
 
