@@ -1,5 +1,6 @@
 export const getBaseUrl = () => {
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  // Use the environment variable if provided, otherwise default to local server with API prefix
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
 };
 
 interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
@@ -8,7 +9,10 @@ interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
 }
 
 export async function apiFetch<T>(endpoint: string, options: ApiFetchOptions = {}): Promise<T> {
-  const url = `${getBaseUrl()}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const baseUrl = getBaseUrl();
+  // Ensure endpoint starts with /
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${baseUrl}${path}`;
 
   const headers = new Headers(options.headers || {});
   
@@ -43,5 +47,5 @@ export async function apiFetch<T>(endpoint: string, options: ApiFetchOptions = {
 
   // If response has no content, return empty object to prevent JSON parse error
   const text = await response.text();
-  return text ? JSON.parse(text) : {};
+  return text ? JSON.parse(text) : <any>{};
 }

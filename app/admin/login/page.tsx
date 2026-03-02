@@ -23,28 +23,23 @@ export default function AdminLoginPage() {
       <div className="login__bg" />
 
       <header className="login__header">
-        <div className="login__brand">NISCHAY</div>
-        <div className="login__logo">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 12v-4M12 12l-2-2M12 12l2-2M8 18h8" />
-          </svg>
-        </div>
+        <div className="login__brand">NISCHAY SHARMA</div>
         <button onClick={() => router.push('/')} className="login__close-btn">
-          + Close
+          Esc — Close
         </button>
       </header>
 
       <section className="login__content">
         <div className="login__box">
-          <h1 className="login__title">Login</h1>
+          <h1 className="login__title">Sign In</h1>
+          <span className="login__subtitle">Admin Control Panel</span>
           <Auth />
         </div>
       </section>
 
       <footer className="login__footer">
         <div className="login__footer-text">
-          Administrative Access Only
+          Unauthorized access is strictly prohibited
         </div>
       </footer>
     </div>

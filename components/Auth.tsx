@@ -27,7 +27,7 @@ export default function Auth() {
       setError('');
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err: any) {
-      setError('Invalid credentials');
+      setError('Access Denied: Invalid Credentials');
     } finally {
       setLoading(false);
     }
@@ -40,14 +40,14 @@ export default function Auth() {
       <div className="auth__fields">
         <Input 
           type="email" 
-          placeholder="EMAIL" 
+          placeholder="Enter Email" 
           variant="minimal"
           value={email} 
           onChange={(e) => setEmail(e.target.value)}
         />
         <Input 
           type="password" 
-          placeholder="PASSWORD" 
+          placeholder="Enter Password" 
           variant="minimal"
           value={password} 
           onChange={(e) => setPassword(e.target.value)}
@@ -59,9 +59,8 @@ export default function Auth() {
           onClick={handleLogin} 
           disabled={loading}
           variant="minimal"
-          className="btn--full"
         >
-          {loading ? 'Entering...' : 'Enter Dashboard'}
+          {loading ? 'Authenticating...' : 'Sign In to Portal'}
         </Button>
       </div>
     </div>
