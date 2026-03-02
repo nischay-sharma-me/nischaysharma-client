@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Menu from '@/components/Menu';
 import { Article } from '@/services/articles.service';
@@ -9,49 +9,50 @@ import { useStore } from '@/store/useStore';
 
 const ArticleSection = ({ article, index }: { article: Article, index: number }) => {
   const ref = useRef(null);
+  
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"]
   });
 
-  // Use a simpler spring for snappier feedback
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
+    stiffness: 80,
+    damping: 25,
     restDelta: 0.001
   });
 
-  // Background Parallax
-  const yOffset = useTransform(smoothProgress, [0, 1], ["0%", "30%"]);
+  // Background Parallax & Scaling
   const scale = useTransform(smoothProgress, [0, 0.5, 1], [1.1, 1, 1.1]);
-  
-  // Content visibility: simplified to ensure it shows up reliably
-  const contentOpacity = useTransform(smoothProgress, [0.1, 0.35, 0.65, 0.9], [0, 1, 1, 0]);
+  const bgY = useTransform(smoothProgress, [0, 1], ["-5%", "5%"]);
+
+  // Content entrance/exit animations
+  const contentOpacity = useTransform(smoothProgress, [0.1, 0.3, 0.7, 0.9], [0, 1, 1, 0]);
   const contentY = useTransform(smoothProgress, [0.1, 0.5, 0.9], [40, 0, -40]);
 
   const getCoverImage = (article: Article) => {
     if (article.backgroundImage) return article.backgroundImage;
+    // Extract first image from content as fallback
     const match = article.content.match(/<img[^>]+src="([^">]+)"/);
     return match ? match[1] : '/architectural-concrete-monument.png';
   };
 
   const plainTextPreview = article.content
-    ? article.content.replace(/<[^>]*>?/gm, ' ').trim().substring(0, 400) + '...'
+    ? article.content.replace(/<[^>]*>?/gm, ' ').trim().substring(0, 450) + '...'
     : 'Explore this curated piece by Nischay Sharma...';
 
   return (
     <section 
       ref={ref} 
       className="articles-parallax__section"
-      style={{ zIndex: index + 10 }}
+      style={{ zIndex: index + 5 }}
     >
-      <motion.div style={{ y: yOffset, scale }} className="articles-parallax__bg">
+      <motion.div style={{ scale, y: bgY }} className="articles-parallax__bg">
         <Image 
           src={getCoverImage(article)} 
           alt={article.title} 
           fill
           style={{ objectFit: 'cover' }}
-          priority={index === 0}
+          priority={index < 2} // Priority for top articles
         />
       </motion.div>
       
@@ -61,7 +62,7 @@ const ArticleSection = ({ article, index }: { article: Article, index: number })
       >
         <div className="articles-parallax__main-info">
           <span className="articles-parallax__eyebrow">
-            Curated Perspective / Volume 0{index + 1}
+            Curated Story / Vol. 0{index + 1}
           </span>
           
           <h2 className="articles-parallax__title">
@@ -69,7 +70,7 @@ const ArticleSection = ({ article, index }: { article: Article, index: number })
           </h2>
           
           <p className="articles-parallax__description">
-            {article.description || "A technical deep-dive into the evolving digital landscape."}
+            {article.description || "A deep-dive into the technical and creative intersection of modern digital ecosystems."}
           </p>
         </div>
 
@@ -80,7 +81,7 @@ const ArticleSection = ({ article, index }: { article: Article, index: number })
           
           <div className="articles-parallax__footer">
             <a href={`/articles/${article.slug}`} className="articles-parallax__link">
-              View Full Article
+              Read Full Story
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
           </div>
@@ -98,8 +99,8 @@ export default function HomeClient({ articles }: { articles: Article[] }) {
       <Menu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
       
       <div className="articles-parallax">
-        {/* --- Modern Hero Section --- */}
-        <section className="landing" style={{ zIndex: 1 }}>
+        {/* --- Hero Section --- */}
+        <section className="landing" style={{ zIndex: 1, height: '100vh', position: 'relative' }}>
           <div className="landing__bg" />
           <header className="landing__header">
             <div className="landing__brand">NISCHAY SHARMA</div>
@@ -115,7 +116,7 @@ export default function HomeClient({ articles }: { articles: Article[] }) {
           
           <section className="landing__hero">
             <motion.div
-               initial={{ opacity: 0, y: 40 }}
+               initial={{ opacity: 0, y: 30 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
             >
@@ -123,7 +124,7 @@ export default function HomeClient({ articles }: { articles: Article[] }) {
                 Digital<br />
                 <span>Anthology</span>
               </h1>
-              <p style={{ color: 'rgba(0,0,0,0.4)', marginTop: '2rem', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+              <p style={{ color: 'rgba(0,0,0,0.4)', marginTop: '2rem', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
                 Curated by Nischay Sharma
               </p>
             </motion.div>
@@ -142,7 +143,7 @@ export default function HomeClient({ articles }: { articles: Article[] }) {
             <ArticleSection key={article.id} article={article} index={index} />
           ))
         ) : (
-          <div className="flex h-screen items-center justify-center bg-black text-white/30 text-[10px] uppercase tracking-widest">
+          <div className="flex h-screen items-center justify-center bg-black text-white/20 text-[10px] uppercase tracking-widest font-bold">
             The collection is currently empty
           </div>
         )}
