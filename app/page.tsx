@@ -108,6 +108,43 @@ export default function Home() {
 
   return (
     <div className="landing-container">
+      <AnimatePresence>
+        {loading && (
+          <motion.div 
+            key="loader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            style={{ 
+              position: 'fixed', 
+              inset: 0, 
+              zIndex: 999, 
+              backgroundColor: '#000', 
+              display: 'flex', 
+              flexDirection: 'column',
+              alignItems: 'center', 
+              justifyContent: 'center',
+              gap: '2rem'
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+              style={{ 
+                width: '60px', 
+                height: '60px', 
+                backgroundColor: '#fff', 
+                borderRadius: '50%' 
+              }}
+            />
+            <div style={{ color: '#fff', fontSize: '10px', fontWeight: 800, letterSpacing: '0.5em', textTransform: 'uppercase' }}>
+              Synchronizing Anthology
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Menu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
       
       <div className="articles-parallax">
@@ -150,11 +187,7 @@ export default function Home() {
         </section>
 
         {/* --- Parallax Articles --- */}
-        {loading ? (
-          <div className="flex h-screen items-center justify-center bg-black">
-            <div className="text-white text-[10px] uppercase tracking-[0.6em] animate-pulse font-bold">Assembling Anthology...</div>
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="flex h-screen items-center justify-center bg-black p-10 text-center">
             <div className="text-white/40 text-[10px] uppercase tracking-[0.4em] font-bold">{error}</div>
           </div>
