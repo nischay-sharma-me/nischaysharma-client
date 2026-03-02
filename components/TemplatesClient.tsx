@@ -35,6 +35,10 @@ export default function TemplatesClient({ initialTemplates, templateConfig }: Te
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editCategory, setEditCategory] = useState('');
+  const [editAiInstructions, setEditAiInstructions] = useState('');
+  const [editIsPublic, setEditIsPublic] = useState(false);
+  const [editStructure, setEditStructure] = useState<{heading: string, contentBrief: string, imagePrompt?: string}[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
 
   // Hydrate store on mount
@@ -70,8 +74,12 @@ export default function TemplatesClient({ initialTemplates, templateConfig }: Te
 
   const handleEditClick = (template: any) => {
     setEditingTemplate(template);
-    setEditName(template.name);
+    setEditName(template.name || '');
     setEditDescription(template.description || '');
+    setEditCategory(template.category || storeConfig?.categories?.[0]?.id || 'blog-post');
+    setEditAiInstructions(template.aiInstructions || '');
+    setEditIsPublic(template.isPublic || false);
+    setEditStructure(template.structure || []);
   };
 
   const handleUpdateTemplate = async (e: React.FormEvent) => {
@@ -85,7 +93,11 @@ export default function TemplatesClient({ initialTemplates, templateConfig }: Te
 
       const response = await updateTemplateAction(editingTemplate.id, {
         name: editName,
-        description: editDescription
+        description: editDescription,
+        category: editCategory,
+        aiInstructions: editAiInstructions,
+        isPublic: editIsPublic,
+        structure: editStructure
       }, token);
 
       if (response.success && 'data' in response) {
@@ -162,13 +174,124 @@ export default function TemplatesClient({ initialTemplates, templateConfig }: Te
                 </div>
 
                 <div className="organization__form-group" style={{ marginTop: '1.5rem' }}>
-                  <label className="label">Description & Instructions</label>
+                  <label className="label">Category</label>
+                  <select 
+                    className="input" 
+                    value={editCategory} 
+                    onChange={(e) => setEditCategory(e.target.value)}
+                    style={{ background: '#fff' }}
+                  >
+                    {storeConfig?.categories?.map((cat: any) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="organization__form-group" style={{ marginTop: '1.5rem' }}>
+                  <label className="label">Public Template</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', cursor: 'pointer' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={editIsPublic}
+                      onChange={(e) => setEditIsPublic(e.target.checked)}
+                    />
+                    Make this template available to everyone
+                  </label>
+                </div>
+
+                <div className="organization__form-group" style={{ marginTop: '1.5rem' }}>
+                  <label className="label">Description</label>
                   <textarea 
                     className="input" 
-                    style={{ height: '100px', resize: 'none', padding: '0.75rem' }}
+                    style={{ height: '60px', resize: 'none', padding: '0.75rem' }}
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                   />
+                </div>
+
+                <div className="organization__form-group" style={{ marginTop: '1.5rem' }}>
+                  <label className="label">AI Instructions</label>
+                  <textarea 
+                    className="input" 
+                    placeholder="Specific guidelines for the AI when using this template..."
+                    style={{ height: '80px', resize: 'none', padding: '0.75rem' }}
+                    value={editAiInstructions}
+                    onChange={(e) => setEditAiInstructions(e.target.value)}
+                  />
+                </div>
+
+                <div className="organization__form-group" style={{ marginTop: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <label className="label">Structure (Sections)</label>
+                    <button 
+                      type="button" 
+                      onClick={() => setEditStructure([...editStructure, { heading: '', contentBrief: '', imagePrompt: '' }])}
+                      style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', color: '#111' }}
+                    >
+                      + Add Section
+                    </button>
+                  </div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                    {editStructure.map((section, idx) => (
+                      <div key={idx} style={{ padding: '1rem', border: '1px solid #eee', borderRadius: '0.5rem', position: 'relative', backgroundColor: '#fafafa' }}>
+                        <button 
+                          type="button" 
+                          onClick={() => setEditStructure(editStructure.filter((_, i) => i !== idx))}
+                          style={{ position: 'absolute', top: '1rem', right: '1rem', color: '#ff6b6b', fontSize: '0.65rem', fontWeight: 'bold' }}
+                        >
+                          REMOVE
+                        </button>
+                        <div style={{ marginBottom: '0.75rem', paddingRight: '40px' }}>
+                           <label className="label" style={{ fontSize: '0.65rem' }}>Heading</label>
+                           <Input 
+                            placeholder="Section Heading" 
+                            value={section.heading}
+                            onChange={(e) => {
+                              const newStructure = [...editStructure];
+                              newStructure[idx].heading = e.target.value;
+                              setEditStructure(newStructure);
+                            }}
+                            style={{ height: '2rem', fontSize: '0.8rem' }}
+                          />
+                        </div>
+                        <div style={{ marginBottom: '0.75rem' }}>
+                          <label className="label" style={{ fontSize: '0.65rem' }}>Content Brief</label>
+                          <textarea 
+                            className="input" 
+                            placeholder="What should this section cover?"
+                            style={{ height: '60px', resize: 'none', padding: '0.5rem', fontSize: '0.8rem' }}
+                            value={section.contentBrief}
+                            onChange={(e) => {
+                              const newStructure = [...editStructure];
+                              newStructure[idx].contentBrief = e.target.value;
+                              setEditStructure(newStructure);
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="label" style={{ fontSize: '0.65rem' }}>Image Prompt (Optional)</label>
+                          <Input 
+                            placeholder="Visual description for AI image generation..." 
+                            value={section.imagePrompt || ''}
+                            onChange={(e) => {
+                              const newStructure = [...editStructure];
+                              newStructure[idx].imagePrompt = e.target.value;
+                              setEditStructure(newStructure);
+                            }}
+                            style={{ height: '2rem', fontSize: '0.8rem' }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    {editStructure.length === 0 && (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#737373', fontSize: '0.75rem', border: '1px dashed #ccc', borderRadius: '0.5rem' }}>
+                        No sections defined. Add sections to outline your article.
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
