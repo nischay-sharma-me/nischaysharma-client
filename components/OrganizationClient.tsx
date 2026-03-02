@@ -10,7 +10,6 @@ import {
   updateOrganizationAction 
 } from '@/actions/organizations';
 import { organizationsService } from '@/services/organizations.service';
-import { useStore } from '@/store/useStore';
 
 interface OrganizationClientProps {
   initialOrg: OrganizationData | null;
@@ -45,12 +44,10 @@ export default function OrganizationClient({ initialOrg, availableOrgs }: Organi
       }, token);
 
       if (response.success && 'data' in response) {
-        setOrganization(response.data);
+        setOrganization(response.data as OrganizationData);
         setShowCreateForm(false);
-      } else if (!response.success && 'error' in response) {
-        setError(response.error);
       } else {
-        setError('Failed to create organization');
+        setError('error' in response ? (response as any).error : 'Failed to create');
       }
     } catch (err: any) {
       setError(err.message);
@@ -67,13 +64,12 @@ export default function OrganizationClient({ initialOrg, availableOrgs }: Organi
       const token = await auth.currentUser?.getIdToken();
       if (!token) throw new Error('No authentication token');
 
-      // For now, still using service directly or can move to action
       const response = await organizationsService.addMember(organization.id, {
         userId: newMemberId,
         role: newMemberRole
       }, token);
 
-      if (response.success) {
+      if (response.success && response.data) {
         setOrganization(response.data);
         setShowAddMember(false);
         setNewMemberId('');
@@ -99,10 +95,10 @@ export default function OrganizationClient({ initialOrg, availableOrgs }: Organi
       }, token);
 
       if (response.success && 'data' in response) {
-        setOrganization(response.data);
+        setOrganization(response.data as OrganizationData);
         setShowEditOrg(false);
-      } else if (!response.success && 'error' in response) {
-        setError(response.error);
+      } else {
+        setError('error' in response ? (response as any).error : 'Failed to update');
       }
     } catch (err: any) {
       setError(err.message);
@@ -111,7 +107,6 @@ export default function OrganizationClient({ initialOrg, availableOrgs }: Organi
     }
   };
 
-  // View logic (simplified for brevity, keeping same BEM structure)
   if (!organization) {
      return (
       <div className="organization">
@@ -162,7 +157,7 @@ export default function OrganizationClient({ initialOrg, availableOrgs }: Organi
                   </Button>
                 </div>
                 <div className="dashboard__recent-list">
-                   {availableOrgs.length > 0 ? (
+                   {availableOrgs && availableOrgs.length > 0 ? (
                     availableOrgs.map((org, i) => (
                       <div key={i} className="dashboard__recent-item">
                         <div className="dashboard__recent-item-info">
