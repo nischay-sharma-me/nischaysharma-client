@@ -20,26 +20,28 @@
     align-items: center
     justify-content: center
     background-color: $color-black
-    // Stacking shadow: make the page look like it's over the previous one
     box-shadow: 0 -30px 60px rgba(0, 0, 0, 0.8)
 
-  &__bg
+  &__container
     position: absolute
     inset: 0
     z-index: 1
+    background-size: cover
+    background-position: center
+    background-repeat: no-repeat
     
-    img
-      width: 100%
-      height: 100%
-      object-fit: cover
-      filter: brightness(0.4) grayscale(10%)
+    &::before
+      content: ''
+      position: absolute
+      inset: 0
+      background: rgba(0,0,0,0.4) // Base dim
+      z-index: 1
 
     &::after
       content: ''
       position: absolute
       inset: 0
       z-index: 2
-      // Darker left side to ensure text readability
       background: linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.3) 100%)
 
   &__content

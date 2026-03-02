@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import Menu from '@/components/Menu';
 import { Article } from '@/services/articles.service';
 import { useStore } from '@/store/useStore';
@@ -46,20 +45,20 @@ const ArticleSection = ({ article, index }: { article: Article, index: number })
       className="articles-parallax__section"
       style={{ zIndex: index + 5 }}
     >
-      <motion.div style={{ scale, y: bgY }} className="articles-parallax__bg">
-        <Image 
-          src={getCoverImage(article)} 
-          alt={article.title} 
-          fill
-          style={{ objectFit: 'cover' }}
-          priority={index < 2} // Priority for top articles
-        />
-      </motion.div>
+      <motion.div 
+        className="articles-parallax__container"
+        style={{ 
+          backgroundImage: `url(${getCoverImage(article)})`,
+          scale,
+          y: bgY
+        }}
+      />
       
       <motion.div 
         style={{ opacity: contentOpacity, y: contentY }} 
         className="articles-parallax__content"
       >
+        {/* Column 1: Title and Description */}
         <div className="articles-parallax__main-info">
           <span className="articles-parallax__eyebrow">
             Curated Story / Vol. 0{index + 1}
@@ -74,6 +73,7 @@ const ArticleSection = ({ article, index }: { article: Article, index: number })
           </p>
         </div>
 
+        {/* Column 2: Faded Preview and Button */}
         <div className="articles-parallax__preview-col">
           <div className="articles-parallax__preview-text">
             {plainTextPreview}
@@ -92,11 +92,11 @@ const ArticleSection = ({ article, index }: { article: Article, index: number })
 };
 
 export default function HomeClient({ articles }: { articles: Article[] }) {
-  const { isMenuOpen, toggleMenu, setIsMenuOpen } = useStore();
+  const { isMenuOpen, toggleMenu } = useStore();
 
   return (
     <div className="landing-container">
-      <Menu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <Menu isOpen={isMenuOpen} onClose={() => toggleMenu()} />
       
       <div className="articles-parallax">
         {/* --- Hero Section --- */}
