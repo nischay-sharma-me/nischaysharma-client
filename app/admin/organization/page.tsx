@@ -9,7 +9,7 @@ import { getAllOrganizationsAction } from '@/actions/organizations';
 export default async function OrganizationPage() {
   // We can still pre-fetch non-auth data on server
   const response = await getAllOrganizationsAction(''); // Empty token for server pre-fetch
-  const availableOrgs = response.success ? response.data : [];
+  const availableOrgs = ('data' in response && response.success) ? response.data : [];
 
   return (
     <OrganizationClient 

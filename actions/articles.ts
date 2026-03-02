@@ -5,7 +5,6 @@ import { articlesService } from '@/services/articles.service';
 export async function getTopArticlesAction(limit: number = 10) {
   try {
     const response = await articlesService.getTopArticles(limit);
-    console.log('xvf', response);
     return response;
   } catch (error) {
     console.error('Server Action Error (getTopArticles):', error);
