@@ -1,41 +1,38 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
 import Menu from '@/components/Menu';
 import { Article } from '@/services/articles.service';
 import { useStore } from '@/store/useStore';
 
 const ArticleSection = ({ 
   article, 
-  index, 
-  containerRef 
+  index 
 }: { 
   article: Article, 
-  index: number,
-  containerRef: React.RefObject<HTMLDivElement | null>
+  index: number 
 }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    container: containerRef,
-    offset: ["start end", "end start"]
-  });
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
-  });
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        } else {
+          setIsVisible(false);
+        }
+      },
+      { threshold: 0.5 } // Trigger when half the page is visible
+    );
 
-  // Background Parallax & Scaling
-  const scale = useTransform(smoothProgress, [0, 0.5, 1], [1.15, 1, 1.15]);
-  const bgY = useTransform(smoothProgress, [0, 1], ["-10%", "10%"]);
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
 
-  // Content Visibility
-  const contentOpacity = useTransform(smoothProgress, [0.15, 0.4, 0.6, 0.85], [0, 1, 1, 0]);
-  const contentY = useTransform(smoothProgress, [0.15, 0.5, 0.85], [80, 0, -80]);
+    return () => observer.disconnect();
+  }, []);
 
   const getCoverImage = (article: Article) => {
     if (article.backgroundImage) return article.backgroundImage;
@@ -50,27 +47,18 @@ const ArticleSection = ({
 
   return (
     <section 
-      ref={ref} 
-      className="articles-parallax__section"
+      ref={sectionRef}
+      className={`articles-parallax__section ${isVisible ? 'is-visible' : ''}`}
       style={{ zIndex: index + 10 }}
     >
-      <motion.div 
+      <div 
         className="articles-parallax__container"
         style={{ 
-          backgroundImage: `url(${getCoverImage(article)})`,
-          scale,
-          y: bgY
+          backgroundImage: `url(${getCoverImage(article)})`
         }}
       />
       
-      <motion.div 
-        style={{ 
-          opacity: contentOpacity, 
-          y: contentY,
-          pointerEvents: 'auto'
-        }} 
-        className="articles-parallax__content"
-      >
+      <div className="articles-parallax__content">
         {/* Column 1: Title and Description */}
         <div className="articles-parallax__main-info">
           <span className="articles-parallax__eyebrow">
@@ -99,23 +87,19 @@ const ArticleSection = ({
             </a>
           </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 };
 
 export default function HomeClient({ articles }: { articles: Article[] }) {
   const { isMenuOpen, toggleMenu } = useStore();
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Fallback check to ensure content is visible if scroll container logic has issues
-  // But primarily we fix the container reference.
 
   return (
     <div className="landing-container">
       <Menu isOpen={isMenuOpen} onClose={() => toggleMenu()} />
       
-      <div ref={containerRef} className="articles-parallax">
+      <div className="articles-parallax">
         {/* --- Hero Section --- */}
         <section className="landing" style={{ zIndex: 1, height: '100vh', position: 'relative' }}>
           <div className="landing__bg" />
@@ -132,11 +116,7 @@ export default function HomeClient({ articles }: { articles: Article[] }) {
           </header>
           
           <section className="landing__hero">
-            <motion.div
-               initial={{ opacity: 0, y: 30 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-            >
+            <div className="landing__hero-wrapper">
               <h1 className="landing__title">
                 Digital<br />
                 <span>Anthology</span>
@@ -144,7 +124,7 @@ export default function HomeClient({ articles }: { articles: Article[] }) {
               <p style={{ color: 'rgba(0,0,0,0.4)', marginTop: '2rem', fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
                 Curated by Nischay Sharma
               </p>
-            </motion.div>
+            </div>
           </section>
           
           <footer className="landing__footer">
@@ -161,7 +141,6 @@ export default function HomeClient({ articles }: { articles: Article[] }) {
               key={article.id} 
               article={article} 
               index={index} 
-              containerRef={containerRef}
             />
           ))
         ) : (
