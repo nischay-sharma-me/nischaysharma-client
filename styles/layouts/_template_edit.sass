@@ -21,12 +21,13 @@
     padding: 0 $spacing-xl $spacing-xl $spacing-xl
     // Custom scrollbar for funky look
     &::-webkit-scrollbar
-      width: 4px
+      width: 5px
     &::-webkit-scrollbar-track
       background: transparent
     &::-webkit-scrollbar-thumb
       background: rgba(0, 0, 0, 0.05)
       border-radius: 10px
+      transition: background 0.3s ease
       &:hover
         background: rgba(0, 0, 0, 0.1)
 
