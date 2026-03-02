@@ -1,18 +1,21 @@
-'use client';
-
 import React from 'react';
+import TemplatesClient from '@/components/TemplatesClient';
+import { listTemplatesAction, getTemplateConfigAction } from '@/actions/templates';
 
-export default function TemplatesPage() {
+// This is a Server Component
+export default async function TemplatesPage() {
+  const [templatesRes, configRes] = await Promise.all([
+    listTemplatesAction(),
+    getTemplateConfigAction()
+  ]);
+
+  const initialTemplates = ('data' in templatesRes && templatesRes.success) ? templatesRes.data : [];
+  const templateConfig = ('data' in configRes && configRes.success) ? configRes.data : null;
+
   return (
-    <>
-      <div className="dashboard__title">
-        <h2>Templates</h2>
-        <p>Manage and create AI article templates.</p>
-      </div>
-      
-      <div className="card card--padded">
-        <p>Template list and generation tools will appear here.</p>
-      </div>
-    </>
+    <TemplatesClient 
+      initialTemplates={initialTemplates} 
+      templateConfig={templateConfig} 
+    />
   );
 }
