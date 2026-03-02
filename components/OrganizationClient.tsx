@@ -44,11 +44,13 @@ export default function OrganizationClient({ initialOrg, availableOrgs }: Organi
         description: orgDescription
       }, token);
 
-      if (response.success) {
+      if (response.success && 'data' in response) {
         setOrganization(response.data);
         setShowCreateForm(false);
+      } else if (!response.success && 'error' in response) {
+        setError(response.error);
       } else {
-        setError(response.error || 'Failed to create');
+        setError('Failed to create organization');
       }
     } catch (err: any) {
       setError(err.message);
@@ -96,9 +98,11 @@ export default function OrganizationClient({ initialOrg, availableOrgs }: Organi
         description: orgDescription
       }, token);
 
-      if (response.success) {
+      if (response.success && 'data' in response) {
         setOrganization(response.data);
         setShowEditOrg(false);
+      } else if (!response.success && 'error' in response) {
+        setError(response.error);
       }
     } catch (err: any) {
       setError(err.message);
