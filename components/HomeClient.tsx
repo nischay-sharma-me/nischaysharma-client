@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import Image from 'next/image';
 import Menu from '@/components/Menu';
 import { Article } from '@/services/articles.service';
 import { useStore } from '@/store/useStore';
@@ -45,7 +46,13 @@ const ArticleSection = ({ article, index }: { article: Article, index: number })
       style={{ zIndex: index + 10 }}
     >
       <motion.div style={{ y: yOffset, scale }} className="articles-parallax__bg">
-        <img src={getCoverImage(article)} alt={article.title} />
+        <Image 
+          src={getCoverImage(article)} 
+          alt={article.title} 
+          fill
+          style={{ objectFit: 'cover' }}
+          priority={index === 0}
+        />
       </motion.div>
       
       <motion.div 

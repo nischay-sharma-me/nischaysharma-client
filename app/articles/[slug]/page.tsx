@@ -1,47 +1,34 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { articlesService, Article } from '@/services/articles.service';
+import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { articlesService, Article } from '@/services/articles.service';
 
-export default function PublicArticleView() {
-  const { slug } = useParams() as { slug: string };
-  const [article, setArticle] = useState<Article | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+export const revalidate = 60; // ISR: Revalidate every 60 seconds
 
-  useEffect(() => {
-    const fetchArticle = async () => {
-      try {
-        setLoading(true);
-        const response = await articlesService.getArticleBySlug(slug);
-        if (response.success) {
-          setArticle(response.data);
-        } else {
-          setError('Article not found');
-        }
-      } catch (err: any) {
-        console.error('Error fetching article:', err);
-        setError(err.message || 'Failed to load article');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchArticle();
-  }, [slug]);
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
 
-  if (loading) {
-    return (
-      <div className="article-view" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="loading">Loading story...</div>
-      </div>
-    );
+export default async function PublicArticleView({ params }: PageProps) {
+  const { slug } = await params;
+  let article: Article | null = null;
+  let error = '';
+
+  try {
+    const response = await articlesService.getArticleBySlug(slug);
+    if (response.success) {
+      article = response.data;
+    } else {
+      error = 'Article not found';
+    }
+  } catch (err: any) {
+    console.error('Error fetching article:', err);
+    error = err.message || 'Failed to load article';
   }
 
   if (error || !article) {
     return (
-      <div className="article-view" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '2rem' }}>
+      <div className="article-view" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '2rem', height: '100vh' }}>
         <h2 className="article-view__title" style={{ color: '#000' }}>{error || 'Article not found'}</h2>
         <Link href="/" className="article-view__back-btn">
           Back to Stories
@@ -51,15 +38,21 @@ export default function PublicArticleView() {
   }
 
   const getCoverImage = () => {
-    if (article.backgroundImage) return article.backgroundImage;
-    const match = article.content.match(/<img[^>]+src="([^">]+)"/);
+    if (article?.backgroundImage) return article.backgroundImage;
+    const match = article?.content.match(/<img[^>]+src="([^">]+)"/);
     return match ? match[1] : '/architectural-concrete-monument.png';
   };
 
   return (
     <div className="article-view">
       <header className="article-view__hero">
-        <img src={getCoverImage()} alt={article.title} />
+        <Image 
+          src={getCoverImage()} 
+          alt={article.title} 
+          fill
+          style={{ objectFit: 'cover' }}
+          priority
+        />
         <div className="article-view__hero-content">
           <h1 className="article-view__title">{article.title}</h1>
           <div className="article-view__meta">

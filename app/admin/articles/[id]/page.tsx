@@ -7,6 +7,7 @@ import { articlesService, Article } from '@/services/articles.service';
 import TiptapEditor from '@/components/editor/TiptapEditor';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import Image from 'next/image';
 
 export default function ArticleEditPage() {
   const { id } = useParams() as { id: string };
@@ -124,11 +125,14 @@ export default function ArticleEditPage() {
             <div className="card card--padded">
                <h1 className="articles-parallax__title" style={{ color: '#000', textAlign: 'left', marginBottom: '2rem' }}>{title}</h1>
                {backgroundImage && (
-                 <img 
-                    src={backgroundImage} 
-                    alt="Cover" 
-                    style={{ width: '100%', height: '300px', objectFit: 'cover', borderRadius: '1rem', marginBottom: '2rem' }} 
-                 />
+                 <div style={{ position: 'relative', width: '100%', height: '300px', marginBottom: '2rem' }}>
+                    <Image 
+                        src={backgroundImage} 
+                        alt="Cover" 
+                        fill
+                        style={{ objectFit: 'cover', borderRadius: '1rem' }} 
+                    />
+                 </div>
                )}
                <div className="tiptap-content" dangerouslySetInnerHTML={{ __html: content }} />
             </div>
@@ -166,8 +170,8 @@ export default function ArticleEditPage() {
                 placeholder="https://..."
               />
               {backgroundImage && (
-                <div style={{ marginTop: '1rem', borderRadius: '0.5rem', overflow: 'hidden', border: '1px solid #eee' }}>
-                  <img src={backgroundImage} alt="Preview" style={{ width: '100%', height: '120px', objectFit: 'cover' }} />
+                <div style={{ marginTop: '1rem', borderRadius: '0.5rem', overflow: 'hidden', border: '1px solid #eee', position: 'relative', width: '100%', height: '120px' }}>
+                  <Image src={backgroundImage} alt="Preview" fill style={{ objectFit: 'cover' }} />
                 </div>
               )}
             </div>
