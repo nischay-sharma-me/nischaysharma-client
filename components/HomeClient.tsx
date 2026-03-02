@@ -18,10 +18,13 @@ const ArticleSection = ({ article, index }: { article: Article, index: number })
     restDelta: 0.001
   });
 
-  // Visual effects
-  const yOffset = useTransform(smoothProgress, [0, 1], ["0%", "25%"]);
-  const scale = useTransform(smoothProgress, [0, 0.5, 1], [1.05, 1, 1.05]);
-  const opacity = useTransform(smoothProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+  // Visual effects: Stacking & Parallax
+  const yOffset = useTransform(smoothProgress, [0, 1], ["0%", "40%"]);
+  const scale = useTransform(smoothProgress, [0, 0.5, 1], [1.1, 1, 1.1]);
+  
+  // Content animations: should be fully visible when the section is centered
+  const contentOpacity = useTransform(smoothProgress, [0.1, 0.3, 0.7, 0.9], [0, 1, 1, 0]);
+  const contentY = useTransform(smoothProgress, [0.1, 0.5, 0.9], [50, 0, -50]);
 
   const getCoverImage = (article: Article) => {
     if (article.backgroundImage) return article.backgroundImage;
@@ -31,73 +34,51 @@ const ArticleSection = ({ article, index }: { article: Article, index: number })
 
   // Strip HTML for the preview
   const plainTextPreview = article.content
-    .replace(/<[^>]*>?/gm, ' ')
-    .trim()
-    .substring(0, 350) + '...';
+    ? article.content.replace(/<[^>]*>?/gm, ' ').trim().substring(0, 400) + '...'
+    : 'Explore this curated piece by Nischay Sharma...';
 
   return (
     <section 
       ref={ref} 
       className="articles-parallax__section"
-      style={{ zIndex: index + 2 }}
+      style={{ zIndex: index + 10 }}
     >
       <motion.div style={{ y: yOffset, scale }} className="articles-parallax__bg">
         <img src={getCoverImage(article)} alt={article.title} />
       </motion.div>
       
       <motion.div 
-        style={{ opacity }} 
+        style={{ opacity: contentOpacity, y: contentY }} 
         className="articles-parallax__content"
       >
         <div className="articles-parallax__main-info">
-          <motion.span 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="articles-parallax__eyebrow"
-          >
-            Editorial No. 0{index + 1}
+          <motion.span className="articles-parallax__eyebrow">
+            Curated Perspective Series / 0{index + 1}
           </motion.span>
           
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="articles-parallax__title"
-          >
+          <h2 className="articles-parallax__title">
             {article.title}
-          </motion.h2>
+          </h2>
           
-          <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.4 }}
-            className="articles-parallax__description"
-          >
-            {article.description || "An in-depth exploration into technical architecture and digital ecosystems."}
-          </motion.p>
+          <p className="articles-parallax__description">
+            {article.description || "A technical deep-dive into the evolving digital landscape."}
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
+          <div className="articles-parallax__footer">
             <a href={`/articles/${article.slug}`} className="articles-parallax__link">
               View Full Article
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-          </motion.div>
+          </div>
         </div>
 
         <div className="articles-parallax__preview-col">
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, delay: 0.5 }}
-            className="articles-parallax__preview-text"
-          >
+          <div className="articles-parallax__preview-text">
             {plainTextPreview}
-          </motion.div>
+          </div>
+          <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.2em', opacity: 0.3, color: '#fff' }}>
+            PRESS ESC TO EXIT MAG
+          </span>
         </div>
       </motion.div>
     </section>
