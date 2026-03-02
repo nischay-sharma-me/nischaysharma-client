@@ -71,18 +71,18 @@ const ArticleSection = ({ article, index }: { article: Article, index: number })
           <p className="articles-parallax__description">
             {article.description || "A technical deep-dive into the evolving digital landscape."}
           </p>
-
-          <div className="articles-parallax__footer">
-            <a href={`/articles/${article.slug}`} className="articles-parallax__link">
-              Read Magazine
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
         </div>
 
         <div className="articles-parallax__preview-col">
           <div className="articles-parallax__preview-text">
             {plainTextPreview}
+          </div>
+          
+          <div className="articles-parallax__footer">
+            <a href={`/articles/${article.slug}`} className="articles-parallax__link">
+              View Full Article
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
           </div>
         </div>
       </motion.div>

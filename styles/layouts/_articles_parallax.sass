@@ -111,7 +111,7 @@
     @include mobile
       border-left: none
       padding-left: 0
-      display: none
+      gap: 1.5rem
 
   &__preview-text
     font-size: 0.875rem
@@ -122,11 +122,13 @@
     max-height: 250px
     overflow: hidden
 
+    @include mobile
+      display: none
+
   &__footer
     display: flex
     align-items: center
     gap: 2rem
-    margin-top: 1rem
 
   &__link
     display: inline-flex
