@@ -158,7 +158,8 @@ export default function OrganizationClient({ initialOrg, availableOrgs }: Organi
                 <div className="dashboard__recent-header">
                   <h3>Available Organizations</h3>
                   <Button variant="primary" style={{ padding: '0.5rem 1rem', height: 'auto' }} onClick={() => setShowCreateForm(true)}>
-                    <span>+ New</span>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '0.9rem', marginRight: '0.4rem' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                    <span>New Org</span>
                   </Button>
                 </div>
                 <div className="dashboard__recent-list">
@@ -219,7 +220,8 @@ export default function OrganizationClient({ initialOrg, availableOrgs }: Organi
             <div className="dashboard__recent-header">
               <h3>Members</h3>
               <Button variant="secondary" style={{ padding: '0.5rem 1rem', height: 'auto' }} onClick={() => setShowAddMember(true)}>
-                <span>+ Add Member</span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '0.9rem', marginRight: '0.4rem' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                <span>Add Member</span>
               </Button>
             </div>
             <div className="dashboard__recent-list">

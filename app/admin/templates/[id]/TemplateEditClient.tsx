@@ -200,8 +200,10 @@ export default function TemplateEditClient({ templateId, templateConfig }: Templ
                       type="button" 
                       onClick={() => setEditStructure([...editStructure, { heading: '', contentBrief: '', imagePrompt: '' }])}
                       className="template-edit__add-btn"
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                     >
-                      + Add Section
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '0.8rem', height: '0.8rem' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                      <span>Add Section</span>
                     </button>
                   </div>
                   
