@@ -139,7 +139,7 @@ export default function TemplatesClient({ initialTemplates, templateConfig }: Te
           </div>
         </div>
 
-        <div className="dashboard__sidebar-col">
+        <div className="dashboard__grid-sidebar">
           <div className="card card--padded">
             <h3 className="label" style={{ marginBottom: '1.5rem' }}>AI Template Generator</h3>
             <form onSubmit={handleGenerate} className="auth__fields">
@@ -177,7 +177,7 @@ export default function TemplatesClient({ initialTemplates, templateConfig }: Te
               </div>
 
               <Button type="submit" variant="primary" className="btn--full" style={{ marginTop: '1rem' }} disabled={generating}>
-                {generating ? 'Requesting...' : 'Generate Template'}
+                <span>{generating ? 'Requesting...' : 'Generate Template'}</span>
               </Button>
             </form>
           </div>

@@ -190,7 +190,7 @@ export default function ArticlesClient({ initialArticles }: ArticlesClientProps)
 
                 <div className="organization__actions" style={{ marginTop: '2rem' }}>
                   <Button type="submit" variant="primary" className="btn--full" disabled={generating}>
-                    {generating ? 'Engine Processing...' : 'Start AI Generation'}
+                    <span>{generating ? 'Engine Processing...' : 'Start AI Generation'}</span>
                   </Button>
                 </div>
               </form>
@@ -207,11 +207,11 @@ export default function ArticlesClient({ initialArticles }: ArticlesClientProps)
                   onClick={() => setShowGenerator(!showGenerator)}
                 >
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '0.8rem', marginRight: '0.4rem' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                  AI
+                  <span>AI</span>
                 </Button>
                 <Link href="/admin/articles/create">
                   <Button variant="primary" style={{ padding: '0.5rem 1rem', height: 'auto' }}>
-                    + New
+                    <span>+ New</span>
                   </Button>
                 </Link>
               </div>
@@ -256,7 +256,7 @@ export default function ArticlesClient({ initialArticles }: ArticlesClientProps)
               ) : (
                 <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
                   <p style={{ color: '#737373', marginBottom: '1.5rem' }}>No articles found.</p>
-                  <Button variant="secondary" onClick={() => setShowGenerator(true)}>Create your first article</Button>
+                  <Button variant="secondary" onClick={() => setShowGenerator(true)}><span>Create your first article</span></Button>
                 </div>
               )}
             </div>

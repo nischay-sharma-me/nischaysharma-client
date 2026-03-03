@@ -108,7 +108,7 @@ export default function ClientsPage() {
       </div>
 
       <div className="dashboard__grid-layout">
-        <div className="lg:col-span-2">
+        <div className="dashboard__grid-main">
           {showCreateForm ? (
             <div className="card card--padded">
               <h3 className="dashboard__recent-item-title" style={{ marginBottom: '1.5rem' }}>Register New Application</h3>
@@ -159,10 +159,10 @@ export default function ClientsPage() {
                 
                 <div className="organization__actions">
                   <Button type="submit" variant="primary" className="btn--full" disabled={actionLoading}>
-                    {actionLoading ? 'Registering...' : 'Register Application'}
+                    <span>{actionLoading ? 'Registering...' : 'Register Application'}</span>
                   </Button>
                   <Button type="button" variant="secondary" className="btn--full" onClick={() => setShowCreateForm(false)}>
-                    Cancel
+                    <span>Cancel</span>
                   </Button>
                 </div>
               </form>
@@ -172,7 +172,7 @@ export default function ClientsPage() {
               <div className="dashboard__recent-header">
                 <h3>Whitelisted Applications</h3>
                 <Button variant="primary" style={{ padding: '0.5rem 1rem', height: 'auto' }} onClick={() => setShowCreateForm(true)}>
-                  + Register App
+                  <span>+ Register App</span>
                 </Button>
               </div>
               <div className="dashboard__recent-list">
@@ -188,21 +188,21 @@ export default function ClientsPage() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                         <button 
-                          className="btn btn--ghost" 
+                         <Button 
+                          variant="ghost"
                           style={{ color: '#ff6b6b', padding: '0.5rem' }}
                           onClick={() => handleDelete(client.id!)}
                           disabled={actionLoading}
                         >
-                          Revoke
-                        </button>
+                          <span>Revoke</span>
+                        </Button>
                       </div>
                     </div>
                   ))
                 ) : (
                   <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
                     <p style={{ color: '#737373', marginBottom: '1.5rem' }}>No external applications registered yet.</p>
-                    <Button variant="secondary" onClick={() => setShowCreateForm(true)}>Register your first app</Button>
+                    <Button variant="secondary" onClick={() => setShowCreateForm(true)}><span>Register your first app</span></Button>
                   </div>
                 )}
               </div>
@@ -210,7 +210,7 @@ export default function ClientsPage() {
           )}
         </div>
 
-        <div className="dashboard__sidebar-col">
+        <div className="dashboard__grid-sidebar">
           <div className="card card--padded">
             <h3 className="label" style={{ marginBottom: '1.5rem', display: 'block', fontSize: '0.625rem', fontWeight: 700, color: '#a3a3a3', textTransform: 'uppercase', letterSpacing: '0.1em' }}>About API Clients</h3>
             <p style={{ fontSize: '0.875rem', lineHeight: 1.6, color: '#737373' }}>
