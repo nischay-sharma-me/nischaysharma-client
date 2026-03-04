@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { auth } from '@/lib/firebase';
 import { conversationsService, Message, Thread } from '@/services/conversations.service';
 import { Button } from '@/components/ui/Button';
@@ -16,6 +16,7 @@ export default function ChatInterface() {
   const threadId = params.id;
 
   const {
+    threads,
     messages,
     sending,
     updateThread,
@@ -24,8 +25,7 @@ export default function ChatInterface() {
     setMessages,
     addMessage,
     updateLastAssistantMessage,
-    setSending,
-    getCurrentThread
+    setSending
   } = useThreadsStore();
 
   const [input, setInput] = useState('');
@@ -38,17 +38,16 @@ export default function ChatInterface() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
 
+  // Derived current thread for reactivity
+  const currentThread = useMemo(() => 
+    threads.find(t => t.id === threadId),
+  [threads, threadId]);
+
   useEffect(() => {
     if (threadId) {
       setCurrentThreadId(threadId);
-      // Only set fetchingDetails to true if we don't have messages yet
-      // This prevents the "page starts loading again" feeling when starting a chat
-      if (messages.length === 0) {
-        fetchThreadDetails(threadId);
-      } else {
-        // Just sync in background
-        syncThreadDetails(threadId);
-      }
+      // Fetch details immediately on ID change
+      fetchThreadDetails(threadId);
       setIsAutoScrolling(true);
       setIsEditingTitle(false);
     } else {
@@ -56,8 +55,6 @@ export default function ChatInterface() {
       setMessages([]);
     }
   }, [threadId]);
-
-  const currentThread = getCurrentThread();
 
   useEffect(() => {
     if (currentThread) {
@@ -97,26 +94,9 @@ export default function ChatInterface() {
     setIsAutoScrolling(isAtBottom);
   };
 
-  const syncThreadDetails = async (id: string) => {
-    try {
-      const token = await auth.currentUser?.getIdToken();
-      if (!token) return;
-      const response = await conversationsService.getThread(id, token);
-      if (response.success) {
-        // If we only have the optimistic message, replace with full history
-        // Otherwise just update the thread info
-        if (messages.length <= 1) {
-          setMessages(response.data.messages || []);
-        }
-        updateThread(id, response.data);
-      }
-    } catch (err) {
-      console.error('Error syncing thread details:', err);
-    }
-  };
-
   const fetchThreadDetails = async (id: string) => {
     try {
+      // Only show full loading if we have no messages for this specific ID
       setFetchingDetails(true);
       const token = await auth.currentUser?.getIdToken();
       if (!token) return;
@@ -152,9 +132,7 @@ export default function ChatInterface() {
         // Create new thread
         const response = await conversationsService.createThread({ message: originalInput }, token);
         if (response.success) {
-          // Update store immediately so the next page has data
           updateThread(response.data.id, response.data);
-          // Navigate without triggering a full re-fetch if possible
           router.push(`/admin/threads/${response.data.id}`);
         }
       } else {
@@ -234,7 +212,7 @@ export default function ChatInterface() {
     }
   };
 
-  // Only block the whole UI if we are literally doing the very first fetch for a thread
+  // Improved loading condition
   if (fetchingDetails && messages.length === 0) return <AdminLoading />;
 
   return (

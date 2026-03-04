@@ -19,9 +19,7 @@ interface ThreadsState {
   setLoading: (loading: boolean) => void;
   setSending: (sending: boolean) => void;
   
-  // Helper to get current thread
-  getCurrentThread: () => Thread | undefined;
-  // Helper to get sorted threads (pinned first)
+  // Helpers
   getSortedThreads: () => Thread[];
 }
 
@@ -68,11 +66,6 @@ export const useThreadsStore = create<ThreadsState>((set, get) => ({
   setLoading: (loading) => set({ loading }),
   
   setSending: (sending) => set({ sending }),
-
-  getCurrentThread: () => {
-    const state = get();
-    return state.threads.find(t => t.id === state.currentThreadId);
-  },
 
   getSortedThreads: () => {
     const { threads } = get();
