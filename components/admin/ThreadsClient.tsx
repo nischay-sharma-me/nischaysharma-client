@@ -117,6 +117,7 @@ export default function ThreadsClient() {
         }
       } else {
         // Stream reply for existing thread
+        console.log('Starting stream for thread:', threadIdFromUrl);
         const response = await conversationsService.streamReply(threadIdFromUrl, originalInput, token);
         
         if (!response.ok) throw new Error('Failed to send message');
@@ -127,20 +128,34 @@ export default function ThreadsClient() {
         // Add placeholder assistant message
         addMessage({ role: 'assistant', content: '' });
 
+        let buffer = '';
+
         while (reader) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done) {
+            console.log('Stream finished');
+            break;
+          }
 
           const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
+          buffer += chunk;
           
+          const lines = buffer.split('\n');
+          // Keep the last line in buffer if it's incomplete
+          buffer = lines.pop() || '';
+
           for (const line of lines) {
             const trimmedLine = line.trim();
             if (!trimmedLine) continue;
             
+            console.log('Received line:', trimmedLine);
+
             if (trimmedLine.startsWith('data: ')) {
               const dataStr = trimmedLine.slice(6);
-              if (dataStr === '[DONE]') break;
+              if (dataStr === '[DONE]') {
+                 console.log('Received [DONE] signal');
+                 break;
+              }
               
               try {
                 const data = JSON.parse(dataStr);
@@ -148,7 +163,7 @@ export default function ThreadsClient() {
                   updateLastAssistantMessage(data.content);
                 }
               } catch (e) {
-                console.warn('Failed to parse SSE data chunk:', dataStr);
+                console.warn('Failed to parse JSON from data chunk:', dataStr);
               }
             }
           }
@@ -156,7 +171,6 @@ export default function ThreadsClient() {
       }
     } catch (err) {
       console.error('Error sending message:', err);
-      // Optional: Add error message to chat
       addMessage({ role: 'assistant', content: 'Sorry, I encountered an error while processing your request.' });
     } finally {
       setSending(false);
@@ -212,18 +226,18 @@ export default function ThreadsClient() {
 
         <div className="threads-admin__messages-container">
           <div className="threads-admin__messages">
-            {messages.length > 0 ? (
-              messages.map((m, i) => (
-                <div key={i} className={`threads-admin__message threads-admin__message--${m.role}`}>
-                  <div className="threads-admin__message-bubble">
-                    {m.content || (m.role === 'assistant' && sending && i === messages.length - 1 ? '...' : '')}
-                  </div>
-                  <div className="threads-admin__message-meta">
-                    {m.role === 'assistant' ? 'AI Assistant' : 'You'}
-                  </div>
+            {messages.map((m, i) => (
+              <div key={i} className={`threads-admin__message threads-admin__message--${m.role}`}>
+                <div className="threads-admin__message-bubble">
+                  {m.content || (m.role === 'assistant' && sending && i === messages.length - 1 ? '...' : '')}
                 </div>
-              ))
-            ) : (
+                <div className="threads-admin__message-meta">
+                  {m.role === 'assistant' ? 'AI Assistant' : 'You'}
+                </div>
+              </div>
+            ))}
+            
+            {messages.length === 0 && (
               <div className="threads-admin__empty-state">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
                   <h3>Start a new conversation</h3>
