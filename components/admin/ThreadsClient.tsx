@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { auth } from '@/lib/firebase';
-import { conversationsService, Message } from '@/services/conversations.service';
+import { conversationsService, Message, Thread } from '@/services/conversations.service';
 import { Button } from '@/components/ui/Button';
 import AdminLoading from '@/app/admin/loading';
 import { useRouter, useParams } from 'next/navigation';
@@ -21,16 +21,22 @@ export default function ThreadsClient() {
     loading,
     sending,
     setThreads,
+    updateThread,
+    deleteThread,
     setCurrentThreadId,
     setMessages,
     addMessage,
     updateLastAssistantMessage,
     setLoading,
     setSending,
-    getCurrentThread
+    getCurrentThread,
+    getSortedThreads
   } = useThreadsStore();
 
   const [input, setInput] = useState('');
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleInput, setTitleInput] = useState('');
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -45,11 +51,20 @@ export default function ThreadsClient() {
       setCurrentThreadId(threadIdFromUrl);
       fetchThreadDetails(threadIdFromUrl);
       setIsAutoScrolling(true);
+      setIsEditingTitle(false);
     } else {
       setCurrentThreadId(null);
       setMessages([]);
     }
-  }, [threadIdFromUrl, setCurrentThreadId, setMessages]);
+  }, [threadIdFromUrl]);
+
+  const currentThread = getCurrentThread();
+
+  useEffect(() => {
+    if (currentThread) {
+      setTitleInput(currentThread.title || '');
+    }
+  }, [currentThread]);
 
   useEffect(() => {
     if (isAutoScrolling) {
@@ -108,6 +123,7 @@ export default function ThreadsClient() {
       const response = await conversationsService.getThread(id, token);
       if (response.success) {
         setMessages(response.data.messages || []);
+        updateThread(id, response.data);
       }
     } catch (err) {
       console.error('Error fetching thread details:', err);
@@ -160,9 +176,65 @@ export default function ThreadsClient() {
     }
   };
 
-  const currentThread = getCurrentThread();
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this conversation?')) return;
+    
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const response = await conversationsService.deleteThread(id, token);
+      if (response.success) {
+        deleteThread(id);
+        router.push('/admin/threads');
+      }
+    } catch (err) {
+      console.error('Error deleting thread:', err);
+      alert('Failed to delete');
+    }
+  };
+
+  const handlePinToggle = async (e: React.MouseEvent, thread: Thread) => {
+    e.stopPropagation();
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      
+      const response = thread.isPinned 
+        ? await conversationsService.unpinThread(thread.id, token)
+        : await conversationsService.pinThread(thread.id, token);
+        
+      if (response.success) {
+        updateThread(thread.id, { isPinned: !thread.isPinned });
+      }
+    } catch (err) {
+      console.error('Error toggling pin:', err);
+    }
+  };
+
+  const handleUpdateTitle = async () => {
+    if (!currentThread || !titleInput.trim() || titleInput === currentThread.title) {
+      setIsEditingTitle(false);
+      return;
+    }
+
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      
+      const response = await conversationsService.updateThread(currentThread.id, { title: titleInput }, token);
+      if (response.success) {
+        updateThread(currentThread.id, { title: titleInput });
+        setIsEditingTitle(false);
+      }
+    } catch (err) {
+      console.error('Error updating title:', err);
+      alert('Failed to update title');
+    }
+  };
 
   if (loading) return <AdminLoading />;
+
+  const sortedThreads = getSortedThreads();
 
   return (
     <div className={`threads-admin ${threadIdFromUrl ? 'threads-admin--chat-open' : ''}`}>
@@ -174,18 +246,26 @@ export default function ThreadsClient() {
           </Button>
         </div>
         <div className="threads-admin__thread-list" data-lenis-prevent>
-          {threads.length > 0 ? (
-            threads.map((t) => (
+          {sortedThreads.length > 0 ? (
+            sortedThreads.map((t) => (
               <div 
                 key={t.id} 
                 className={`threads-admin__thread-item ${threadIdFromUrl === t.id ? 'threads-admin__thread-item--active' : ''}`}
                 onClick={() => router.push(`/admin/threads/${t.id}`)}
               >
-                <div className="threads-admin__thread-item-title">{t.title || 'Untitled Conversation'}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                  <div className="threads-admin__thread-item-title">{t.title || 'Untitled'}</div>
+                  <button 
+                    onClick={(e) => handlePinToggle(e, t)}
+                    style={{ background: 'none', border: 'none', padding: '0', color: t.isPinned ? '#111' : '#a3a3a3', opacity: t.isPinned ? 1 : 0.4 }}
+                  >
+                    <svg fill={t.isPinned ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" style={{ width: '0.75rem', height: '0.75rem' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                  </button>
+                </div>
                 <div className="threads-admin__thread-item-meta">
                   <span>{new Date(t.updatedAt).toLocaleDateString()}</span>
                   <span>•</span>
-                  <span>{t.messages?.length || 0} messages</span>
+                  <span>{t.messages?.length || 0} msgs</span>
                 </div>
               </div>
             ))
@@ -199,21 +279,64 @@ export default function ThreadsClient() {
 
       <main className="threads-admin__chat-area">
         <header className="threads-admin__chat-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0, flex: 1 }}>
              <button 
                 className="threads-admin__back-btn" 
                 onClick={() => router.push('/admin/threads')}
-                title="Back to threads"
+                title="Back"
              >
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '1.25rem' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
              </button>
-             <h2>{currentThread?.title || (threadIdFromUrl ? 'Loading...' : 'New Conversation')}</h2>
+             
+             {isEditingTitle ? (
+               <input 
+                autoFocus
+                className="threads-admin__title-input"
+                value={titleInput}
+                onChange={(e) => setTitleInput(e.target.value)}
+                onBlur={handleUpdateTitle}
+                onKeyDown={(e) => e.key === 'Enter' && handleUpdateTitle()}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: '1px solid #111',
+                  fontSize: '0.875rem',
+                  fontWeight: 700,
+                  padding: '0',
+                  outline: 'none',
+                  width: '100%'
+                }}
+               />
+             ) : (
+               <h2 
+                onClick={() => setIsEditingTitle(true)}
+                style={{ cursor: 'pointer' }}
+                title="Click to edit title"
+               >
+                {currentThread?.title || (threadIdFromUrl ? 'Loading...' : 'New Conversation')}
+               </h2>
+             )}
           </div>
           
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Button variant="ghost" style={{ padding: '0.4rem', color: '#ff6b6b' }} title="Delete Thread">
-               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '1rem' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-            </Button>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            {currentThread && (
+              <>
+                <button 
+                  onClick={(e) => handlePinToggle(e as any, currentThread)}
+                  style={{ background: 'none', border: 'none', color: currentThread.isPinned ? '#111' : '#737373', padding: '0.4rem' }}
+                >
+                  <svg fill={currentThread.isPinned ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" style={{ width: '1rem', height: '1rem' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                </button>
+                <Button 
+                  variant="ghost" 
+                  style={{ padding: '0.4rem', color: '#ff6b6b' }} 
+                  title="Delete Thread"
+                  onClick={() => handleDelete(currentThread.id)}
+                >
+                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '1rem', height: '1rem' }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </Button>
+              </>
+            )}
           </div>
         </header>
 

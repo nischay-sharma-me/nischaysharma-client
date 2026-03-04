@@ -11,6 +11,7 @@ export interface Thread {
   title?: string;
   messages: Message[];
   userId: string;
+  isPinned?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -18,6 +19,11 @@ export interface Thread {
 export interface CreateThreadData {
   message: string;
   title?: string;
+}
+
+export interface UpdateThreadData {
+  title?: string;
+  isPinned?: boolean;
 }
 
 export const conversationsService = {
@@ -53,11 +59,42 @@ export const conversationsService = {
   },
 
   /**
+   * Update a conversation thread (title, pin status)
+   */
+  updateThread: (threadId: string, data: UpdateThreadData, token: string) => {
+    return apiFetch<{ success: boolean; data: Thread }>(`/conversations/${threadId}`, {
+      method: 'PATCH',
+      token,
+      body: data,
+    });
+  },
+
+  /**
    * Delete a conversation thread
    */
   deleteThread: (threadId: string, token: string) => {
     return apiFetch<{ success: boolean; message: string }>(`/conversations/${threadId}`, {
       method: 'DELETE',
+      token,
+    });
+  },
+
+  /**
+   * Pin a conversation thread
+   */
+  pinThread: (threadId: string, token: string) => {
+    return apiFetch<{ success: boolean; data: Thread }>(`/conversations/${threadId}/pin`, {
+      method: 'PATCH',
+      token,
+    });
+  },
+
+  /**
+   * Unpin a conversation thread
+   */
+  unpinThread: (threadId: string, token: string) => {
+    return apiFetch<{ success: boolean; data: Thread }>(`/conversations/${threadId}/unpin`, {
+      method: 'PATCH',
       token,
     });
   },
@@ -123,12 +160,12 @@ export const conversationsService = {
 
             try {
               const data = JSON.parse(dataStr);
-              if (data.text) {
-                onContent(data.text);
+              // Check for both .text (some implementations) and .content (standard)
+              const content = data.content || data.text;
+              if (content) {
+                onContent(content);
               }
             } catch (e) {
-              // If JSON parsing fails, it might be a partial chunk, 
-              // but since we split by \n, this shouldn't happen often.
               console.warn('Incomplete JSON in SSE stream:', dataStr);
             }
           }

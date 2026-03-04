@@ -10,6 +10,8 @@ interface ThreadsState {
 
   // Actions
   setThreads: (threads: Thread[]) => void;
+  updateThread: (threadId: string, updates: Partial<Thread>) => void;
+  deleteThread: (threadId: string) => void;
   setCurrentThreadId: (id: string | null) => void;
   setMessages: (messages: Message[]) => void;
   addMessage: (message: Message) => void;
@@ -19,6 +21,8 @@ interface ThreadsState {
   
   // Helper to get current thread
   getCurrentThread: () => Thread | undefined;
+  // Helper to get sorted threads (pinned first)
+  getSortedThreads: () => Thread[];
 }
 
 export const useThreadsStore = create<ThreadsState>((set, get) => ({
@@ -29,6 +33,16 @@ export const useThreadsStore = create<ThreadsState>((set, get) => ({
   sending: false,
 
   setThreads: (threads) => set({ threads }),
+
+  updateThread: (threadId, updates) => set((state) => ({
+    threads: state.threads.map(t => t.id === threadId ? { ...t, ...updates } : t)
+  })),
+
+  deleteThread: (threadId) => set((state) => ({
+    threads: state.threads.filter(t => t.id !== threadId),
+    currentThreadId: state.currentThreadId === threadId ? null : state.currentThreadId,
+    messages: state.currentThreadId === threadId ? [] : state.messages
+  })),
   
   setCurrentThreadId: (id) => set({ currentThreadId: id }),
   
@@ -58,5 +72,16 @@ export const useThreadsStore = create<ThreadsState>((set, get) => ({
   getCurrentThread: () => {
     const state = get();
     return state.threads.find(t => t.id === state.currentThreadId);
+  },
+
+  getSortedThreads: () => {
+    const { threads } = get();
+    return [...threads].sort((a, b) => {
+      // Pinned first
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      // Then by updatedAt
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
   }
 }));
