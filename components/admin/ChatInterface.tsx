@@ -252,19 +252,24 @@ export default function ChatInterface() {
 
   const handleDownload = async (url: string) => {
     try {
-      const response = await fetch(url);
+      // Attempt to download directly via fetch (requires CORS)
+      const response = await fetch(url, { mode: 'cors' });
+      
+      if (!response.ok) throw new Error('Network response was not ok');
+      
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = `generated-image-${Date.now()}.png`;
+      link.download = `taughtcode-ai-gen-${Date.now()}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      console.error('Download failed:', error);
-      alert('Failed to download image');
+      console.warn('Direct download failed (likely CORS). Falling back to new tab.', error);
+      // Fallback: Open in new tab which usually allows right-click save
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
