@@ -176,19 +176,22 @@ export default function ChatInterface() {
               // The server sends the URL in the content when finished
               // Update the last message (which should be the 'image' role message we just added)
               updateLastAssistantMessage(data.content);
+              setSending(false); // Stop the spinner once the image is fully generated
             } else if (data.text) {
               // Fallback for older server implementations
               updateLastAssistantMessage(data.text);
             }
+          },
+          () => {
+             setSending(false);
           }
         );
       }
     } catch (err: any) {
       console.error('Error sending message:', err);
       addMessage({ role: 'assistant', content: `Error: ${err.message}` });
-    } finally {
       setSending(false);
-    }
+    } 
   };
 
   const handleDelete = async () => {
