@@ -3,9 +3,11 @@ import { initSocket, onJobEvent, disconnectSocket } from '@/services/socketServi
 import { toast } from 'sonner';
 import { eventsService } from '@/services/events.service';
 import { auth } from '@/lib/firebase';
+import { useNotificationStore } from '@/store/useNotificationStore';
 
 export const useJobSocket = (userId?: string, deviceId?: string) => {
   const [isConnected, setIsConnected] = useState(false);
+  const { addNotification } = useNotificationStore();
 
   useEffect(() => {
     if (!userId) return;
@@ -16,7 +18,7 @@ export const useJobSocket = (userId?: string, deviceId?: string) => {
       const socket = await initSocket(deviceId);
       if (socket) {
         setIsConnected(socket.connected);
-        
+
         socket.on('connect', () => setIsConnected(true));
         socket.on('disconnect', () => setIsConnected(false));
 
@@ -32,28 +34,51 @@ export const useJobSocket = (userId?: string, deviceId?: string) => {
       if (cleanup) cleanup();
       disconnectSocket();
     };
-  }, [deviceId]);
+  }, [userId, deviceId]);
 
   const handleJobNotification = async (data: any, devId?: string) => {
     const { type, status, id } = data;
-    
-    // Display Toast
+
+    let message = '';
+    let toastType: 'info' | 'success' | 'error' | 'loading' = 'info';
+
+    // Map status to human-readable message and toast type
     switch (status) {
       case 'queued':
-        toast.info(`Job Queued: ${type}`, { description: `ID: ${id}` });
+        message = `Job Queued: ${type.replace(/-/g, ' ')}`;
+        toastType = 'info';
         break;
       case 'processing':
-        toast.loading(`Job Processing: ${type}`, { description: `Progress: ${data.progress}%` });
+        message = `Job Processing: ${type.replace(/-/g, ' ')} (${data.progress}%)`;
+        toastType = 'loading';
         break;
       case 'completed':
-        toast.success(`Job Completed: ${type}`, { description: `Successfully finished.` });
+        message = `Job Completed: ${type.replace(/-/g, ' ')}`;
+        toastType = 'success';
         break;
       case 'failed':
-        toast.error(`Job Failed: ${type}`, { description: data.error || 'Unknown error occurred.' });
+        message = `Job Failed: ${type.replace(/-/g, ' ')}`;
+        toastType = 'error';
         break;
     }
 
-    // Store event on server (Requirement: Save ONLY after successful reception on client)
+    // Display Persistent Toast (duration: Infinity)
+    toast[toastType](message, { 
+      description: status === 'failed' ? (data.error || 'Unknown error occurred.') : `ID: ${id}`,
+      duration: Infinity, // Keep on screen until clicked/closed
+      id: `job_${id}_${status}` // Prevent duplicate toasts for same status
+    });
+
+    // Add to Notification Store
+    addNotification({
+      type,
+      status,
+      message,
+      timestamp: Date.now(),
+      data: data
+    });
+
+    // Store event on server
     try {
       const token = await auth.currentUser?.getIdToken();
       if (token) {
@@ -70,3 +95,4 @@ export const useJobSocket = (userId?: string, deviceId?: string) => {
 
   return { isConnected };
 };
+

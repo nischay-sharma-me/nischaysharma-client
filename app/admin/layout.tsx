@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { primaryNavItems, secondaryNavItems } from '@/config/adminNav';
 import { useStore } from '@/store/useStore';
 import { clientAppsService } from '@/services/clientApps.service';
+import NotificationBell from '@/components/admin/NotificationBell';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, setUser, activeAdminTab, setActiveAdminTab } = useStore();
@@ -147,6 +148,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
           
           <div className="dashboard__header-actions">
+            <NotificationBell />
             <Link href="/" className="btn btn--secondary">
               <i className="ph ph-arrow-square-out" />
               <span>View Site</span>
