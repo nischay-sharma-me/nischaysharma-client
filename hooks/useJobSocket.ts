@@ -4,10 +4,12 @@ import { toast } from 'sonner';
 import { eventsService } from '@/services/events.service';
 import { auth } from '@/lib/firebase';
 
-export const useJobSocket = (deviceId?: string) => {
+export const useJobSocket = (userId?: string, deviceId?: string) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    if (!userId) return;
+
     let cleanup: (() => void) | undefined;
 
     const setupSocket = async () => {

@@ -11,6 +11,12 @@ import { v4 as uuidv4 } from 'uuid';
 export default function RealtimeNotificationHandler() {
   const processedJobs = useRef<Set<string>>(new Set());
   const [deviceId, setDeviceId] = useState<string | undefined>(undefined);
+  const [user, setUser] = useState<any>(null);
+
+  // Track auth state
+  useEffect(() => {
+    return onAuthStateChanged(auth, (u) => setUser(u));
+  }, []);
 
   // Initialize unique device ID for this session/browser
   useEffect(() => {
@@ -22,53 +28,49 @@ export default function RealtimeNotificationHandler() {
     setDeviceId(id);
   }, []);
 
-  // Use the new WebSocket hook
-  useJobSocket(deviceId);
+  // Use the new WebSocket hook - only connects when user is present
+  useJobSocket(user?.uid, deviceId);
+useEffect(() => {
+  if (user) {
+    const notificationsRef = ref(rtdb, `notifications/${user.uid}/jobs`);
 
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const notificationsRef = ref(rtdb, `notifications/${user.uid}/jobs`);
-        
-        onValue(notificationsRef, (snapshot) => {
-          const data = snapshot.val();
-          if (!data) return;
+    onValue(notificationsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (!data) return;
 
-          Object.keys(data).forEach((jobId) => {
-            const job = data[jobId];
-            
-            // Only notify if we haven't processed this specific status update for this job
-            const processKey = `${jobId}_${job.status}_${job.updatedAt}`;
-            if (processedJobs.current.has(processKey)) return;
-            processedJobs.current.add(processKey);
+      Object.keys(data).forEach((jobId) => {
+        const job = data[jobId];
 
-            if (job.status === 'completed') {
-              toast.success('Job Completed', {
-                description: `${job.type.replace(/-/g, ' ')} is ready.`,
-                duration: 5000,
-              });
-              // Clean up the notification from RTDB after a delay
-              setTimeout(() => remove(ref(rtdb, `notifications/${user.uid}/jobs/${jobId}`)), 2000);
-            } else if (job.status === 'failed') {
-              toast.error('Job Failed', {
-                description: job.message || 'An error occurred during processing.',
-                duration: 6000,
-              });
-              setTimeout(() => remove(ref(rtdb, `notifications/${user.uid}/jobs/${jobId}`)), 2000);
-            } else if (job.status === 'processing' && job.progress === 10) {
-              toast.info('Processing Started', {
-                description: `Your ${job.type.replace(/-/g, ' ')} is being generated...`,
-              });
-            }
+        // Only notify if we haven't processed this specific status update for this job
+        const processKey = `${jobId}_${job.status}_${job.updatedAt}`;
+        if (processedJobs.current.has(processKey)) return;
+        processedJobs.current.add(processKey);
+
+        if (job.status === 'completed') {
+          toast.success('Job Completed', {
+            description: `${job.type.replace(/-/g, ' ')} is ready.`,
+            duration: 5000,
           });
-        });
-
-        return () => off(notificationsRef);
-      }
+          // Clean up the notification from RTDB after a delay
+          setTimeout(() => remove(ref(rtdb, `notifications/${user.uid}/jobs/${jobId}`)), 2000);
+        } else if (job.status === 'failed') {
+          toast.error('Job Failed', {
+            description: job.message || 'An error occurred during processing.',
+            duration: 6000,
+          });
+          setTimeout(() => remove(ref(rtdb, `notifications/${user.uid}/jobs/${jobId}`)), 2000);
+        } else if (job.status === 'processing' && job.progress === 10) {
+          toast.info('Processing Started', {
+            description: `Your ${job.type.replace(/-/g, ' ')} is being generated...`,
+          });
+        }
+      });
     });
 
-    return () => unsubscribeAuth();
-  }, []);
+    return () => off(notificationsRef);
+  }
+}, [user]);
+
 
   return null;
 }
