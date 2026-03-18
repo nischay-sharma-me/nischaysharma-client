@@ -3,20 +3,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { auth } from '@/lib/firebase';
 import { usersService } from '@/services/users.service';
+import { integrationsService, IntegrationsList } from '@/services/integrations.service';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { toast } from 'sonner';
 import AdminLoading from '@/app/admin/loading';
 import { format } from 'date-fns';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 export default function ProfileClient() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [syncingRepos, setSyncingRepos] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
   
   const [user, setUser] = useState<any>(null);
+  const [integrations, setIntegrations] = useState<IntegrationsList>({});
   
   const photoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +43,21 @@ export default function ProfileClient() {
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+    fetchIntegrations();
+    
+    // Handle OAuth results from URL
+    const success = searchParams.get('integration_success');
+    const error = searchParams.get('integration_error');
+    
+    if (success) {
+      toast.success(`Successfully connected to ${success}!`);
+      // Clean URL
+      router.replace('/admin/profile');
+    } else if (error) {
+      toast.error(`Connection failed: ${error}`);
+      router.replace('/admin/profile');
+    }
+  }, [searchParams]);
 
   const fetchProfile = async () => {
     try {
@@ -61,6 +81,82 @@ export default function ProfileClient() {
       console.error('Error fetching profile:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchIntegrations = async () => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const res = await integrationsService.list(token);
+      if (res.success) setIntegrations(res.data);
+    } catch (err) {
+      console.error('Error fetching integrations:', err);
+    }
+  };
+
+  const handleConnect = async (provider: 'github' | 'linkedin') => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const res = await integrationsService.initiateAuth(provider, token);
+      if (res.success && res.authUrl) {
+        window.location.href = res.authUrl;
+      }
+    } catch (err: any) {
+      toast.error(`Failed to initiate ${provider} connection: ` + err.message);
+    }
+  };
+
+  const handleDisconnect = async (provider: 'github' | 'linkedin') => {
+    if (!confirm(`Are you sure you want to disconnect ${provider}?`)) return;
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const res = await integrationsService.remove(provider, token);
+      if (res.success) {
+        toast.success(`Disconnected from ${provider}`);
+        fetchIntegrations();
+      }
+    } catch (err: any) {
+      toast.error(`Failed to disconnect ${provider}: ` + err.message);
+    }
+  };
+
+  const handleSyncGitHubRepos = async () => {
+    try {
+      setSyncingRepos(true);
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const res = await integrationsService.syncGitHubProjects(token);
+      if (res.success && Array.isArray(res.data)) {
+        // Map top 5 starred/updated repos that aren't already in projects
+        const currentLinks = projects.map(p => p.link);
+        const newProjectsFromGit = res.data
+          .filter(repo => !currentLinks.includes(repo.link))
+          .slice(0, 5)
+          .map(repo => ({
+            title: repo.title,
+            description: repo.description,
+            link: repo.link
+          }));
+
+        if (newProjectsFromGit.length > 0) {
+          const updatedProjects = [...projects, ...newProjectsFromGit];
+          setProjects(updatedProjects);
+          
+          // Persist to server automatically
+          await usersService.updateMe({ projects: updatedProjects } as any, token);
+          
+          toast.success(`Synced ${newProjectsFromGit.length} projects from GitHub!`);
+        } else {
+          toast.info('All your GitHub projects are already listed.');
+        }
+      }
+    } catch (err: any) {
+      toast.error('Failed to sync projects: ' + err.message);
+    } finally {
+      setSyncingRepos(false);
     }
   };
 
@@ -322,7 +418,20 @@ export default function ProfileClient() {
 
             <div className="form-divider" style={{ borderTop: '1px solid var(--color-border)', margin: '2rem 0' }}></div>
             
-            <h3 className="label" style={{ marginBottom: '1.5rem', fontSize: '0.875rem' }}>Featured Projects</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 className="label" style={{ margin: 0, fontSize: '0.875rem' }}>Featured Projects</h3>
+              {integrations.github?.connected && (
+                <Button 
+                  variant="ghost" 
+                  style={{ fontSize: '0.7rem' }} 
+                  onClick={handleSyncGitHubRepos}
+                  loading={syncingRepos}
+                >
+                  <i className="ph ph-arrow-counter-clockwise" style={{ marginRight: '0.4rem' }} />
+                  Sync from GitHub
+                </Button>
+              )}
+            </div>
 
             <div className="form-group" style={{ marginBottom: '2rem' }}>
               <div style={{ display: 'grid', gap: '1rem', padding: '1.5rem', background: 'var(--color-bg-tertiary)', borderRadius: '0.5rem', marginBottom: '1rem' }}>
@@ -418,6 +527,48 @@ export default function ProfileClient() {
         {/* Sidebar Column */}
         <div className="dashboard__sidebar-col">
           
+          <div className="card card--padded">
+            <h3 className="label" style={{ marginBottom: '1.5rem', fontSize: '0.875rem' }}>External Connections</h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* GitHub */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderRadius: '0.5rem', background: 'var(--color-bg-tertiary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <i className="ph ph-github-logo" style={{ fontSize: '1.25rem' }} />
+                  <div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 700 }}>GitHub</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
+                      {integrations.github?.connected ? `@${integrations.github.accountName}` : 'Not connected'}
+                    </div>
+                  </div>
+                </div>
+                {integrations.github?.connected ? (
+                  <button onClick={() => handleDisconnect('github')} style={{ background: 'none', border: 'none', color: 'var(--color-error)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer' }}>Disconnect</button>
+                ) : (
+                  <button onClick={() => handleConnect('github')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer' }}>Connect</button>
+                )}
+              </div>
+
+              {/* LinkedIn */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderRadius: '0.5rem', background: 'var(--color-bg-tertiary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <i className="ph ph-linkedin-logo" style={{ fontSize: '1.25rem' }} />
+                  <div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 700 }}>LinkedIn</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
+                      {integrations.linkedin?.connected ? 'Connected' : 'Not connected'}
+                    </div>
+                  </div>
+                </div>
+                {integrations.linkedin?.connected ? (
+                  <button onClick={() => handleDisconnect('linkedin')} style={{ background: 'none', border: 'none', color: 'var(--color-error)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer' }}>Disconnect</button>
+                ) : (
+                  <button onClick={() => handleConnect('linkedin')} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer' }}>Connect</button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="card card--padded">
             <h3 className="label" style={{ marginBottom: '1rem', fontSize: '0.875rem' }}>AI Persona Settings</h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '1.5rem', lineHeight: 1.5 }}>

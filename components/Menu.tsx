@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface MenuProps {
   isOpen: boolean;
   onClose: () => void;
-  profile?: any;
 }
 
 const menuItems = [
@@ -15,9 +14,7 @@ const menuItems = [
   { label: 'Contact', href: '#contact' },
 ];
 
-export default function Menu({ isOpen, onClose, profile }: MenuProps) {
-  const socialLinks = profile?.socialLinks || {};
-
+export default function Menu({ isOpen, onClose }: MenuProps) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -49,25 +46,11 @@ export default function Menu({ isOpen, onClose, profile }: MenuProps) {
           </nav>
 
           <div className="menu__socials">
-            {socialLinks.twitter && (
-              <a href={socialLinks.twitter} target="_blank" rel="noreferrer" className="menu__social-link">Twitter</a>
-            )}
-            {socialLinks.linkedin && (
-              <a href={socialLinks.linkedin} target="_blank" rel="noreferrer" className="menu__social-link">LinkedIn</a>
-            )}
-            {socialLinks.github && (
-              <a href={socialLinks.github} target="_blank" rel="noreferrer" className="menu__social-link">GitHub</a>
-            )}
-            {socialLinks.website && (
-              <a href={socialLinks.website} target="_blank" rel="noreferrer" className="menu__social-link">Website</a>
-            )}
-            {!socialLinks.twitter && !socialLinks.linkedin && !socialLinks.github && !socialLinks.website && (
-              ['Instagram', 'LinkedIn', 'Twitter'].map((social) => (
-                <a key={social} href="#" className="menu__social-link">
-                  {social}
-                </a>
-              ))
-            )}
+            {['Instagram', 'LinkedIn', 'Twitter'].map((social) => (
+              <a key={social} href="#" className="menu__social-link">
+                {social}
+              </a>
+            ))}
           </div>
         </motion.div>
       )}

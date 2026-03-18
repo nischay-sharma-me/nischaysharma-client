@@ -22,12 +22,6 @@ export const usersService = {
     });
   },
 
-  getPublicAdmin: () => {
-    return apiFetch<any>('/users/public/admin', {
-      method: 'GET',
-    });
-  },
-
   getMe: (token: string) => {
     return apiFetch<any>('/users/me', {
       method: 'GET',

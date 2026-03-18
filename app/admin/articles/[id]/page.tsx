@@ -11,6 +11,7 @@ import Image from 'next/image';
 import ArticlesLoading from '@/app/admin/articles/loading';
 import { toast } from 'sonner';
 import { useDialogStore } from '@/store/useDialogStore';
+import { integrationsService, IntegrationsList } from '@/services/integrations.service';
 
 export default function ArticleEditPage() {
   const { id } = useParams() as { id: string };
@@ -19,6 +20,8 @@ export default function ArticleEditPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [integrations, setIntegrations] = useState<IntegrationsList>({});
   const [error, setError] = useState('');
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
@@ -29,7 +32,19 @@ export default function ArticleEditPage() {
 
   useEffect(() => {
     fetchArticle();
+    fetchIntegrations();
   }, [id]);
+
+  const fetchIntegrations = async () => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const res = await integrationsService.list(token);
+      if (res.success) setIntegrations(res.data);
+    } catch (err) {
+      console.error('Error fetching integrations:', err);
+    }
+  };
 
   const fetchArticle = async () => {
     try {
@@ -100,6 +115,32 @@ export default function ArticleEditPage() {
     });
   };
 
+  const handleShareToLinkedIn = async () => {
+    if (!article) return;
+    try {
+      setSharing(true);
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) throw new Error('No authentication token');
+
+      const shareText = `🚀 Just published a new article: "${title}"\n\n${description || ''}\n\nRead more on TaughtCode.`;
+      const url = `${window.location.origin}/articles/${article.slug}`;
+
+      const response = await integrationsService.shareToLinkedIn({
+        text: shareText,
+        url: url,
+        title: title
+      }, token);
+
+      if (response.success) {
+        toast.success('Successfully shared to LinkedIn!');
+      }
+    } catch (err: any) {
+      toast.error('Failed to share to LinkedIn: ' + err.message);
+    } finally {
+      setSharing(false);
+    }
+  };
+
   if (loading) return <ArticlesLoading />;
   if (!article) return <div className="error">Article not found</div>;
 
@@ -127,6 +168,17 @@ export default function ArticleEditPage() {
             <Button variant="primary" onClick={handlePublish} disabled={publishing} style={{ background: '#10b981', border: 'none' }}>
               <i className="ph ph-paper-plane-tilt" style={{ marginRight: '0.4rem' }} />
               <span>Publish</span>
+            </Button>
+          )}
+          {article.status === 'published' && integrations.linkedin?.connected && (
+            <Button 
+              variant="secondary" 
+              onClick={handleShareToLinkedIn} 
+              disabled={sharing}
+              style={{ background: '#0077b5', color: '#fff', border: 'none' }}
+            >
+              <i className="ph ph-linkedin-logo" style={{ marginRight: '0.4rem' }} />
+              <span>{sharing ? 'Sharing...' : 'Share'}</span>
             </Button>
           )}
         </div>

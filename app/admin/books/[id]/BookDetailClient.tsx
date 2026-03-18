@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import AdminLoading from '@/app/admin/loading';
 import TiptapEditor from '@/components/editor/TiptapEditor';
 import { toast } from 'sonner';
+import { integrationsService, IntegrationsList } from '@/services/integrations.service';
 
 interface BookDetailClientProps {
   bookId: string;
@@ -34,10 +35,24 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
   const [book, setBook] = useState<FullBook | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeChapterId, setActiveChapterId] = useState<string | 'root' | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const [integrations, setIntegrations] = useState<IntegrationsList>({});
 
   useEffect(() => {
     fetchBookData();
+    fetchIntegrations();
   }, [bookId]);
+
+  const fetchIntegrations = async () => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const res = await integrationsService.list(token);
+      if (res.success) setIntegrations(res.data);
+    } catch (err) {
+      console.error('Error fetching integrations:', err);
+    }
+  };
 
   const fetchBookData = async () => {
     try {
@@ -93,6 +108,32 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
     });
   };
 
+  const handleShareToLinkedIn = async () => {
+    if (!book) return;
+    try {
+      setSharing(true);
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) throw new Error('No authentication token');
+
+      const shareText = `📚 Just published a new technical collection: "${book.title}"\n\n${book.description || ''}\n\nExplore it on TaughtCode.`;
+      const url = `${window.location.origin}/books/${book.id}`;
+
+      const response = await integrationsService.shareToLinkedIn({
+        text: shareText,
+        url: url,
+        title: book.title
+      }, token);
+
+      if (response.success) {
+        toast.success('Successfully shared to LinkedIn!');
+      }
+    } catch (err: any) {
+      toast.error('Failed to share to LinkedIn: ' + err.message);
+    } finally {
+      setSharing(false);
+    }
+  };
+
   return (
     <div className="book-editor">
       <header className="dashboard__header">
@@ -115,6 +156,17 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
               <i className="ph ph-eye" />
               <span>Preview</span>
             </Button>
+            {book.status === 'published' && integrations.linkedin?.connected && (
+              <Button 
+                variant="secondary" 
+                onClick={handleShareToLinkedIn} 
+                disabled={sharing}
+                style={{ background: '#0077b5', color: '#fff', border: 'none' }}
+              >
+                <i className="ph ph-linkedin-logo" />
+                <span>{sharing ? 'Sharing...' : 'Share'}</span>
+              </Button>
+            )}
             <Button 
               variant="primary" 
               onClick={() => toast.info('Save coming soon!')}

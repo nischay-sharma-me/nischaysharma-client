@@ -1,43 +1,36 @@
 import { apiFetch } from './apiClient';
 
 export interface Integration {
-  id?: string;
-  provider: string;
-  config: any;
-  status: 'active' | 'inactive';
-  lastSync?: string;
-  createdAt: string;
-  updatedAt: string;
+  connected: boolean;
+  accountName?: string;
+  username?: string;
+  urn?: string;
+  connectedAt?: string;
+  updatedAt?: string;
+}
+
+export interface IntegrationsList {
+  github?: Integration;
+  linkedin?: Integration;
 }
 
 export const integrationsService = {
   /**
-   * List all active integrations for the current user
+   * List all active integrations
    */
-  listIntegrations: (token: string) => {
-    return apiFetch<{ success: boolean; data: Integration[] }>('/integrations', {
+  list: (token: string) => {
+    return apiFetch<{ success: boolean; data: IntegrationsList }>('/integrations', {
       method: 'GET',
       token,
     });
   },
 
   /**
-   * Update or Setup a third-party integration (e.g., github)
+   * Initiate OAuth flow for a provider
    */
-  updateIntegration: (provider: string, config: any, token: string) => {
-    return apiFetch<{ success: boolean; data: Integration }>(`/integrations/${provider}`, {
-      method: 'PUT',
-      token,
-      body: config,
-    });
-  },
-
-  /**
-   * Manually trigger a sync for an integration
-   */
-  syncIntegration: (provider: string, token: string) => {
-    return apiFetch<{ success: boolean; message: string }>(`/integrations/${provider}/sync`, {
-      method: 'POST',
+  initiateAuth: (provider: 'github' | 'linkedin', token: string) => {
+    return apiFetch<{ success: boolean; authUrl: string }>(`/integrations/${provider}/auth`, {
+      method: 'GET',
       token,
     });
   },
@@ -45,10 +38,32 @@ export const integrationsService = {
   /**
    * Remove an integration
    */
-  removeIntegration: (provider: string, token: string) => {
-    return apiFetch<{ success: boolean; message: string }>(`/integrations/${provider}`, {
+  remove: (provider: 'github' | 'linkedin', token: string) => {
+    return apiFetch<{ success: boolean; data: any }>(`/integrations/${provider}`, {
       method: 'DELETE',
       token,
+    });
+  },
+
+  /**
+   * Sync projects from GitHub
+   */
+  syncGitHubProjects: (token: string) => {
+    return apiFetch<{ success: boolean; data: any[] }>('/integrations/github/sync', {
+      method: 'POST',
+      token,
+      body: { action: 'get_repos' }
+    });
+  },
+
+  /**
+   * Share content to LinkedIn
+   */
+  shareToLinkedIn: (data: { text: string; url?: string; title?: string }, token: string) => {
+    return apiFetch<{ success: boolean; data: any }>('/integrations/linkedin/sync', {
+      method: 'POST',
+      token,
+      body: data
     });
   }
 };
