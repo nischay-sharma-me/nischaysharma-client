@@ -57,6 +57,17 @@ export const integrationsService = {
   },
 
   /**
+   * Generate an AI-powered social media post
+   */
+  generateAIPost: (data: { title: string; description?: string; type: 'article' | 'book' }, token: string) => {
+    return apiFetch<{ success: boolean; data: string }>('/integrations/ai-post', {
+      method: 'POST',
+      token,
+      body: data
+    });
+  },
+
+  /**
    * Sync projects from GitHub
    */
   syncGitHubProjects: (token: string) => {

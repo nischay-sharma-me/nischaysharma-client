@@ -36,6 +36,7 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
   const [loading, setLoading] = useState(true);
   const [activeChapterId, setActiveChapterId] = useState<string | 'root' | null>(null);
   const [sharing, setSharing] = useState(false);
+  const [generatingPost, setGeneratingPost] = useState(false);
   const [linkedinPostText, setLinkedinPostText] = useState('');
   const [integrations, setIntegrations] = useState<IntegrationsList>({});
 
@@ -132,6 +133,30 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
       toast.error('Failed to share to LinkedIn: ' + err.message);
     } finally {
       setSharing(false);
+    }
+  };
+
+  const handleGenerateAIPost = async () => {
+    if (!book) return;
+    try {
+      setGeneratingPost(true);
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+
+      const response = await integrationsService.generateAIPost({
+        title: book.title,
+        description: book.description,
+        type: 'book'
+      }, token);
+
+      if (response.success) {
+        setLinkedinPostText(response.data);
+        toast.success('AI post generated!');
+      }
+    } catch (err: any) {
+      toast.error('AI generation failed: ' + err.message);
+    } finally {
+      setGeneratingPost(false);
     }
   };
 
@@ -250,7 +275,17 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
                 </p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <label className="label" style={{ fontSize: '0.65rem' }}>LinkedIn Post</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label className="label" style={{ fontSize: '0.65rem', margin: 0 }}>LinkedIn Post</label>
+                    <button 
+                      onClick={handleGenerateAIPost} 
+                      disabled={generatingPost}
+                      style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', fontSize: '0.65rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem' }}
+                    >
+                      {generatingPost ? <i className="ph ph-spinner animate-spin" /> : <i className="ph ph-sparkle" />}
+                      AI Gen
+                    </button>
+                  </div>
                   <textarea 
                     className="input" 
                     style={{ height: '100px', resize: 'vertical', padding: '0.5rem', fontSize: '0.75rem', background: '#fff' }}

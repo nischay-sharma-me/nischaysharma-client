@@ -22,6 +22,7 @@ export default function ArticleEditPage() {
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [generatingPost, setGeneratingPost] = useState(false);
   const [integrations, setIntegrations] = useState<IntegrationsList>({});
   const [error, setError] = useState('');
   const [content, setContent] = useState('');
@@ -143,6 +144,29 @@ export default function ArticleEditPage() {
     }
   };
 
+  const handleGenerateAIPost = async () => {
+    try {
+      setGeneratingPost(true);
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+
+      const response = await integrationsService.generateAIPost({
+        title,
+        description,
+        type: 'article'
+      }, token);
+
+      if (response.success) {
+        setLinkedinPostText(response.data);
+        toast.success('AI post generated!');
+      }
+    } catch (err: any) {
+      toast.error('AI generation failed: ' + err.message);
+    } finally {
+      setGeneratingPost(false);
+    }
+  };
+
   if (loading) return <ArticlesLoading />;
   if (!article) return <div className="error">Article not found</div>;
 
@@ -224,7 +248,17 @@ export default function ArticleEditPage() {
                 </p>
               ) : (
                 <div className="organization__form-group">
-                  <label className="label">LinkedIn Post Content</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <label className="label" style={{ margin: 0 }}>LinkedIn Post Content</label>
+                    <button 
+                      onClick={handleGenerateAIPost} 
+                      disabled={generatingPost}
+                      style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                    >
+                      {generatingPost ? <i className="ph ph-spinner animate-spin" /> : <i className="ph ph-sparkle" />}
+                      Generate with AI
+                    </button>
+                  </div>
                   <textarea 
                     className="input" 
                     style={{ height: '120px', resize: 'vertical', padding: '0.75rem', fontSize: '0.8rem' }}
