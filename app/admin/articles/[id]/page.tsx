@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { articlesService, Article } from '@/services/articles.service';
@@ -27,6 +28,7 @@ export default function ArticleEditPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [backgroundImage, setBackgroundImage] = useState('');
+  const [linkedinPostText, setLinkedinPostText] = useState('');
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const { openDialog } = useDialogStore();
 
@@ -59,6 +61,7 @@ export default function ArticleEditPage() {
         setDescription(response.data.description);
         setContent(response.data.content);
         setBackgroundImage(response.data.backgroundImage || '');
+        setLinkedinPostText(`🚀 Just published a new article: "${response.data.title}"\n\n${response.data.description || ''}\n\nRead more on TaughtCode.`);
       }
     } catch (err: any) {
       setError(err.message);
@@ -122,11 +125,10 @@ export default function ArticleEditPage() {
       const token = await auth.currentUser?.getIdToken();
       if (!token) throw new Error('No authentication token');
 
-      const shareText = `🚀 Just published a new article: "${title}"\n\n${description || ''}\n\nRead more on TaughtCode.`;
       const url = `${window.location.origin}/articles/${article.slug}`;
 
       const response = await integrationsService.shareToLinkedIn({
-        text: shareText,
+        text: linkedinPostText,
         url: url,
         title: title
       }, token);
@@ -168,17 +170,6 @@ export default function ArticleEditPage() {
             <Button variant="primary" onClick={handlePublish} disabled={publishing} style={{ background: '#10b981', border: 'none' }}>
               <i className="ph ph-paper-plane-tilt" style={{ marginRight: '0.4rem' }} />
               <span>Publish</span>
-            </Button>
-          )}
-          {article.status === 'published' && integrations.linkedin?.connected && (
-            <Button 
-              variant="secondary" 
-              onClick={handleShareToLinkedIn} 
-              disabled={sharing}
-              style={{ background: '#0077b5', color: '#fff', border: 'none' }}
-            >
-              <i className="ph ph-linkedin-logo" style={{ marginRight: '0.4rem' }} />
-              <span>{sharing ? 'Sharing...' : 'Share'}</span>
             </Button>
           )}
         </div>
@@ -223,6 +214,40 @@ export default function ArticleEditPage() {
         </div>
 
         <div className="dashboard__grid-sidebar">
+          {article.status === 'published' && (
+            <div className="card card--padded">
+              <h3 className="label" style={{ marginBottom: '1.5rem' }}>Social Distribution</h3>
+              
+              {!integrations.linkedin?.connected ? (
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
+                  Connect your LinkedIn account in <Link href="/admin/profile" style={{ textDecoration: 'underline' }}>Profile Settings</Link> to share your articles directly.
+                </p>
+              ) : (
+                <div className="organization__form-group">
+                  <label className="label">LinkedIn Post Content</label>
+                  <textarea 
+                    className="input" 
+                    style={{ height: '120px', resize: 'vertical', padding: '0.75rem', fontSize: '0.8rem' }}
+                    value={linkedinPostText}
+                    onChange={(e) => setLinkedinPostText(e.target.value)}
+                    placeholder="What would you like to say on LinkedIn?"
+                  />
+                  <Button 
+                    variant="secondary" 
+                    className="btn--full"
+                    style={{ marginTop: '1rem', background: '#0077b5', color: '#fff', border: 'none' }}
+                    onClick={handleShareToLinkedIn}
+                    disabled={sharing}
+                    loading={sharing}
+                  >
+                    <i className="ph ph-linkedin-logo" style={{ marginRight: '0.4rem' }} />
+                    <span>Share to LinkedIn</span>
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="card card--padded">
             <h3 className="label" style={{ marginBottom: '1.5rem' }}>Visuals & SEO</h3>
             

@@ -36,6 +36,7 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
   const [loading, setLoading] = useState(true);
   const [activeChapterId, setActiveChapterId] = useState<string | 'root' | null>(null);
   const [sharing, setSharing] = useState(false);
+  const [linkedinPostText, setLinkedinPostText] = useState('');
   const [integrations, setIntegrations] = useState<IntegrationsList>({});
 
   useEffect(() => {
@@ -64,6 +65,7 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
 
       if (response.success) {
         setBook(response.data);
+        setLinkedinPostText(`📚 Just published a new technical collection: "${response.data.title}"\n\n${response.data.description || ''}\n\nExplore it on TaughtCode.`);
         if (response.data.chapters && response.data.chapters.length > 0) {
           setActiveChapterId(response.data.chapters[0].id);
         } else if (response.data.pages && response.data.pages.length > 0) {
@@ -115,11 +117,10 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
       const token = await auth.currentUser?.getIdToken();
       if (!token) throw new Error('No authentication token');
 
-      const shareText = `📚 Just published a new technical collection: "${book.title}"\n\n${book.description || ''}\n\nExplore it on TaughtCode.`;
       const url = `${window.location.origin}/books/${book.id}`;
 
       const response = await integrationsService.shareToLinkedIn({
-        text: shareText,
+        text: linkedinPostText,
         url: url,
         title: book.title
       }, token);
@@ -156,17 +157,6 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
               <i className="ph ph-eye" />
               <span>Preview</span>
             </Button>
-            {book.status === 'published' && integrations.linkedin?.connected && (
-              <Button 
-                variant="secondary" 
-                onClick={handleShareToLinkedIn} 
-                disabled={sharing}
-                style={{ background: '#0077b5', color: '#fff', border: 'none' }}
-              >
-                <i className="ph ph-linkedin-logo" />
-                <span>{sharing ? 'Sharing...' : 'Share'}</span>
-              </Button>
-            )}
             <Button 
               variant="primary" 
               onClick={() => toast.info('Save coming soon!')}
@@ -249,6 +239,39 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
                </div>
              ))}
            </div>
+
+           {book.status === 'published' && (
+            <div style={{ marginTop: '4rem', padding: '0 0.5rem' }}>
+              <h3 style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 800, marginBottom: '1.5rem' }}>Distribution</h3>
+              
+              {!integrations.linkedin?.connected ? (
+                <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
+                  Connect LinkedIn in profile settings to share.
+                </p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <label className="label" style={{ fontSize: '0.65rem' }}>LinkedIn Post</label>
+                  <textarea 
+                    className="input" 
+                    style={{ height: '100px', resize: 'vertical', padding: '0.5rem', fontSize: '0.75rem', background: '#fff' }}
+                    value={linkedinPostText}
+                    onChange={(e) => setLinkedinPostText(e.target.value)}
+                  />
+                  <Button 
+                    variant="secondary" 
+                    className="btn--full"
+                    style={{ background: '#0077b5', color: '#fff', border: 'none', fontSize: '0.7rem', height: '2.5rem' }}
+                    onClick={handleShareToLinkedIn}
+                    disabled={sharing}
+                    loading={sharing}
+                  >
+                    <i className="ph ph-linkedin-logo" style={{ marginRight: '0.4rem' }} />
+                    <span>Share Now</span>
+                  </Button>
+                </div>
+              )}
+            </div>
+           )}
         </aside>
 
         {/* Main Content Area: Pages */}
