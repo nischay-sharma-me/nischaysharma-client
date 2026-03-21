@@ -104,10 +104,10 @@ export default function AboutPage() {
                     className="activity-monitor__day"
                     title={`${day.count} ${day.count === 1 ? 'Contribution' : 'Contributions'} on ${format(parseISO(day.date), 'MMMM do')}`}
                     style={{
-                      background: day.level === 0 ? '#eee' : 
-                                  day.level === 1 ? 'rgba(0,0,0,0.1)' :
-                                  day.level === 2 ? 'rgba(0,0,0,0.3)' :
-                                  day.level === 3 ? 'rgba(0,0,0,0.6)' : '#000'
+                      background: day.count === 0 ? '#eee' : 
+                                  day.count < 5 ? 'rgba(0,0,0,0.15)' :
+                                  day.count < 10 ? 'rgba(0,0,0,0.4)' :
+                                  day.count < 20 ? 'rgba(0,0,0,0.7)' : '#000'
                     }}
                   />
                 ))}
@@ -121,9 +121,9 @@ export default function AboutPage() {
             <div className="activity-monitor__legend">
               <span style={{ opacity: 0.5 }}>Less</span>
               <span style={{ background: '#eee' }} />
-              <span style={{ background: 'rgba(0,0,0,0.1)' }} />
-              <span style={{ background: 'rgba(0,0,0,0.3)' }} />
-              <span style={{ background: 'rgba(0,0,0,0.6)' }} />
+              <span style={{ background: 'rgba(0,0,0,0.15)' }} />
+              <span style={{ background: 'rgba(0,0,0,0.4)' }} />
+              <span style={{ background: 'rgba(0,0,0,0.7)' }} />
               <span style={{ background: '#000' }} />
               <span style={{ opacity: 0.5 }}>More</span>
             </div>
