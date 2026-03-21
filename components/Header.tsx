@@ -13,7 +13,17 @@ export default function Header() {
   if (pathname.startsWith('/admin')) return null;
 
   return (
-    <header className="landing__header" style={{ position: 'fixed', zIndex: 1000, width: '90%', left: '50%', transform: 'translateX(-50%)', top: '1.5rem' }}>
+    <header className="landing__header" style={{ 
+      position: 'fixed', 
+      zIndex: 1000, 
+      width: '90%', 
+      left: '50%', 
+      transform: 'translateX(-50%)', 
+      top: '1.5rem',
+      display: 'grid',
+      gridTemplateColumns: '1fr auto 1fr',
+      alignItems: 'center'
+    }}>
       <Link href="/" className="landing__brand" style={{ textDecoration: 'none', color: 'inherit' }}>
         NISCHAY SHARMA
       </Link>
@@ -22,7 +32,7 @@ export default function Header() {
         <i className="ph ph-stack" style={{ fontSize: '1.5rem' }} />
       </div>
       
-      <button onClick={toggleMenu} className="landing__menu-btn">
+      <button onClick={toggleMenu} className="landing__menu-btn" style={{ justifySelf: 'end' }}>
         {isMenuOpen ? 'Close' : 'Menu'}
       </button>
     </header>
