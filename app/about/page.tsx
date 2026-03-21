@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Menu from '@/components/Menu';
-import { useStore } from '@/store/useStore';
 import Link from 'next/link';
 import { auth } from '@/lib/firebase';
 import { usersService } from '@/services/users.service';
@@ -49,18 +47,6 @@ export default function AboutPage() {
 
   return (
     <div className="landing-container">
-      <Menu isOpen={isMenuOpen} onClose={() => toggleMenu()} />
-      
-      <header className="landing__header" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100 }}>
-        <Link href="/" className="landing__brand" style={{ textDecoration: 'none', color: 'inherit' }}>{profile?.displayName || 'NISCHAY SHARMA'}</Link>
-        <div className="landing__logo">
-          <i className="ph ph-stack" style={{ fontSize: '1.5rem' }} />
-        </div>
-        <button onClick={toggleMenu} className="landing__menu-btn">
-          Menu
-        </button>
-      </header>
-
       <main className="about-view">
         <section className="about-hero">
           <div className="about-hero__content">

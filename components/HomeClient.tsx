@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import Menu from '@/components/Menu';
 import { Article } from '@/services/articles.service';
-import { useStore } from '@/store/useStore';
 
 const ArticleSection = ({ 
   article, 
@@ -89,25 +87,12 @@ const ArticleSection = ({
 };
 
 export default function HomeClient({ articles }: { articles: Article[] }) {
-  const { isMenuOpen, toggleMenu } = useStore();
-
   return (
     <div className="landing-container">
-      <Menu isOpen={isMenuOpen} onClose={() => toggleMenu()} />
-      
       <div className="articles-parallax">
         {/* --- Hero Section --- */}
         <section className="landing" style={{ zIndex: 1, height: '100vh', position: 'relative', scrollSnapAlign: 'start' }}>
           <div className="landing__bg" />
-          <header className="landing__header">
-            <div className="landing__brand">NISCHAY SHARMA</div>
-            <div className="landing__logo">
-              <i className="ph ph-stack" style={{ fontSize: '1.5rem' }} />
-            </div>
-            <button onClick={toggleMenu} className="landing__menu-btn">
-              Menu
-            </button>
-          </header>
           
           <section className="landing__hero">
             <div className="landing__hero-wrapper">

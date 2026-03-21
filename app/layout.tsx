@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import RealtimeNotificationHandler from "@/components/RealtimeNotificationHandler";
 import SplashLoader from "@/components/SplashLoader";
 import { Dialog } from "@/components/ui/Dialog";
+import NavigationWrapper from "@/components/NavigationWrapper";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -48,6 +49,7 @@ export default function RootLayout({
         <Toaster position="top-right" richColors expand closeButton />
         <Dialog />
         <RealtimeNotificationHandler />
+        <NavigationWrapper />
         <SmoothScrollProvider>
           {children}
         </SmoothScrollProvider>
