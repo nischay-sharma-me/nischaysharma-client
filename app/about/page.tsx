@@ -59,53 +59,49 @@ export default function AboutPage() {
         </button>
       </header>
 
-      <main className="about-view" style={{ paddingTop: '10vh', minHeight: '100vh', background: '#fff' }}>
-        <section className="about-hero" style={{ padding: '4rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
+      <main className="about-view">
+        <section className="about-hero">
           <div className="about-hero__content">
-            <span className="articles-parallax__eyebrow" style={{ color: '#a3a3a3', marginBottom: '1rem', display: 'block' }}>
-              The Architect
-            </span>
-            <h1 style={{ fontSize: 'clamp(3rem, 10vw, 6rem)', fontWeight: 800, lineHeight: 0.9, letterSpacing: '-0.02em', margin: '0 0 4rem 0' }}>
+            <span className="about-hero__eyebrow">The Architect</span>
+            <h1 className="about-hero__title">
               {profile?.displayName?.split(' ')[0] || 'Nischay'}<br />
               {profile?.displayName?.split(' ')[1] || 'Sharma'}.
             </h1>
             
-            <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem' }}>
+            <div className="about-grid">
               <div className="about-text">
-                <p style={{ fontSize: '1.25rem', lineHeight: 1.6, color: '#333', marginBottom: '2rem' }}>
+                <p className="about-text__bio">
                   {profile?.bio || 'I am a lead developer specializing in building scalable backend systems, architecting cloud-native applications, and creating intuitive developer experiences.'}
                 </p>
                 
-                {/* GitHub Summary Stats */}
                 {github && (
-                  <div style={{ display: 'flex', gap: '3rem', marginTop: '4rem' }}>
-                    <div>
-                      <span style={{ fontSize: '2rem', fontWeight: 800 }}>{github.stats.totalStars}</span>
-                      <p style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', opacity: 0.5 }}>Stars Earned</p>
+                  <div className="github-impact">
+                    <div className="github-impact__stat">
+                      <span className="github-impact__number">{github.stats.totalStars}</span>
+                      <span className="github-impact__label">Stars Earned</span>
                     </div>
-                    <div>
-                      <span style={{ fontSize: '2rem', fontWeight: 800 }}>{github.stats.totalContributions}</span>
-                      <p style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', opacity: 0.5 }}>Yearly Commits</p>
+                    <div className="github-impact__stat">
+                      <span className="github-impact__number">{github.stats.totalContributions}</span>
+                      <span className="github-impact__label">Yearly Commits</span>
                     </div>
-                    <div>
-                      <span style={{ fontSize: '2rem', fontWeight: 800 }}>{github.stats.followerCount}</span>
-                      <p style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', opacity: 0.5 }}>Followers</p>
+                    <div className="github-impact__stat">
+                      <span className="github-impact__number">{github.stats.followerCount}</span>
+                      <span className="github-impact__label">Followers</span>
                     </div>
                   </div>
                 )}
               </div>
               
-              <div className="about-stats" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.5 }}>Occupation</span>
-                  <p style={{ marginTop: '0.5rem', fontWeight: 700 }}>{profile?.occupation || 'AI Orchestrator'}</p>
+              <div className="about-stats">
+                <div className="about-stats__item">
+                  <span className="about-stats__label">Occupation</span>
+                  <p className="about-stats__value">{profile?.occupation || 'AI Orchestrator'}</p>
                 </div>
                 
-                {/* Tech Stack Percentage Bar */}
                 {github?.languages && (
-                  <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.5, marginBottom: '1rem', display: 'block' }}>Primary Stack</span>
-                    <div style={{ display: 'flex', height: '8px', borderRadius: '4px', overflow: 'hidden', background: '#eee', marginBottom: '1rem' }}>
+                  <div className="about-stats__item">
+                    <span className="about-stats__label">Primary Stack</span>
+                    <div className="stack-bar">
                       {github.languages.slice(0, 5).map((lang: any) => (
                         <div 
                           key={lang.name} 
@@ -114,10 +110,10 @@ export default function AboutPage() {
                         />
                       ))}
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    <div className="stack-list">
                       {github.languages.slice(0, 4).map((lang: any) => (
-                        <div key={lang.name} style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: lang.color || '#000' }} />
+                        <div key={lang.name} className="stack-list__item">
+                           <span className="stack-list__dot" style={{ background: lang.color || '#000' }} />
                            <span style={{ fontWeight: 600 }}>{lang.name}</span>
                            <span style={{ opacity: 0.4 }}>{lang.percentage}%</span>
                         </div>
@@ -126,31 +122,26 @@ export default function AboutPage() {
                   </div>
                 )}
 
-                <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.5 }}>Contact</span>
-                  <p style={{ marginTop: '0.5rem', fontWeight: 700 }}>{profile?.email}</p>
+                <div className="about-stats__item">
+                  <span className="about-stats__label">Contact</span>
+                  <p className="about-stats__value">{profile?.email}</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* GitHub Activity Heatmap Section */}
         {github?.contributionCalendar && (
-          <section style={{ padding: '6rem 2rem', background: '#fcfcfc', borderY: '1px solid #eee' }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-              <h3 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.5, marginBottom: '2rem' }}>
-                Activity Monitor
-              </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-                {github.contributionCalendar.slice(-200).map((day: any, i: number) => (
+          <section className="activity-monitor">
+            <div className="activity-monitor__container">
+              <h3 className="about-stats__label" style={{ marginBottom: '3rem' }}>Activity Monitor</h3>
+              <div className="activity-monitor__grid">
+                {github.contributionCalendar.slice(-371).map((day: any, i: number) => (
                   <div 
                     key={i}
+                    className="activity-monitor__day"
                     title={`${day.date}: ${day.count} contributions`}
                     style={{
-                      width: '10px',
-                      height: '10px',
-                      borderRadius: '1px',
                       background: day.level === 0 ? '#eee' : 
                                   day.level === 1 ? '#d1d5db' :
                                   day.level === 2 ? '#9ca3af' :
@@ -159,28 +150,27 @@ export default function AboutPage() {
                   />
                 ))}
               </div>
-              <p style={{ marginTop: '1rem', fontSize: '0.65rem', opacity: 0.4 }}>
-                Real-time contribution frequency synced via GitHub GraphQL.
+              <p style={{ marginTop: '1.5rem', fontSize: '0.65rem', opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Real-time frequency synced via GitHub GraphQL
               </p>
             </div>
           </section>
         )}
 
-        {/* LinkedIn Experience Section */}
         {linkedin?.positions && linkedin.positions.length > 0 && (
-          <section style={{ padding: '8rem 2rem' }}>
-             <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '4rem' }}>Professional Timeline</h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
+          <section className="timeline-section">
+             <div className="timeline-section__container">
+                <h2 className="timeline-section__title">Professional Timeline</h2>
+                <div className="timeline">
                   {linkedin.positions.map((pos: any, i: number) => (
-                    <div key={i} style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '2rem' }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 800, opacity: 0.4, paddingTop: '0.5rem' }}>
+                    <div key={i} className="timeline__item">
+                      <div className="timeline__date">
                         {pos.startDate} — {pos.endDate}
                       </div>
-                      <div>
-                        <h4 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>{pos.title}</h4>
-                        <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-primary)', marginTop: '0.25rem' }}>{pos.company}</p>
-                        <p style={{ marginTop: '1.5rem', color: '#666', lineHeight: 1.6, maxWidth: '700px' }}>{pos.description}</p>
+                      <div className="timeline__content">
+                        <h4 className="timeline__job-title">{pos.title}</h4>
+                        <p className="timeline__company">{pos.company}</p>
+                        <p className="timeline__description">{pos.description}</p>
                       </div>
                     </div>
                   ))}
@@ -189,34 +179,26 @@ export default function AboutPage() {
           </section>
         )}
 
-        <section className="about-vision" style={{ padding: '8rem 2rem', background: '#000', color: '#fff' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 800, marginBottom: '4rem', letterSpacing: '-0.02em' }}>The Vision</h2>
-            <div style={{ maxWidth: '800px' }}>
-              <p style={{ fontSize: '1.5rem', lineHeight: 1.4, opacity: 0.8, marginBottom: '2rem' }}>
-                {profile?.preferences?.visionStatement || 'TaughtCode aims to become the standard for "Smart Backend" architectures—where infrastructure doesn\'t just store data, but actively participates in the value creation process through intelligent automation and orchestration.'}
-              </p>
-            </div>
+        <section className="vision-section">
+          <div className="vision-section__container">
+            <h2 className="vision-section__title">The Vision</h2>
+            <p className="vision-section__text">
+              {profile?.preferences?.visionStatement || 'TaughtCode aims to become the standard for "Smart Backend" architectures—where infrastructure doesn\'t just store data, but actively participates in the value creation process through intelligent automation and orchestration.'}
+            </p>
           </div>
         </section>
 
-        <section className="about-footer" style={{ padding: '4rem 2rem', borderTop: '1px solid #eee' }}>
-           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, opacity: 0.4 }}>© {new Date().getFullYear()} {profile?.displayName?.toUpperCase() || 'NISCHAY SHARMA'}</div>
-              <div style={{ display: 'flex', gap: '2rem' }}>
-                {profile?.socialLinks?.github && <a href={profile.socialLinks.github} target="_blank" style={{ fontSize: '0.75rem', fontWeight: 800, color: '#000', textDecoration: 'none' }}>GITHUB</a>}
-                {profile?.socialLinks?.linkedin && <a href={profile.socialLinks.linkedin} target="_blank" style={{ fontSize: '0.75rem', fontWeight: 800, color: '#000', textDecoration: 'none' }}>LINKEDIN</a>}
-                {profile?.socialLinks?.twitter && <a href={profile.socialLinks.twitter} target="_blank" style={{ fontSize: '0.75rem', fontWeight: 800, color: '#000', textDecoration: 'none' }}>TWITTER</a>}
+        <footer className="about-footer">
+           <div className="about-footer__container">
+              <div className="about-footer__copyright">© {new Date().getFullYear()} {profile?.displayName?.toUpperCase() || 'NISCHAY SHARMA'}</div>
+              <div className="about-footer__socials">
+                {profile?.socialLinks?.github && <a href={profile.socialLinks.github} target="_blank" className="about-footer__link">GITHUB</a>}
+                {profile?.socialLinks?.linkedin && <a href={profile.socialLinks.linkedin} target="_blank" className="about-footer__link">LINKEDIN</a>}
+                {profile?.socialLinks?.twitter && <a href={profile.socialLinks.twitter} target="_blank" className="about-footer__link">TWITTER</a>}
               </div>
            </div>
-        </section>
+        </footer>
       </main>
-
-      <style jsx global>{`
-        .about-view {
-          font-family: var(--font-sans, sans-serif);
-        }
-      `}</style>
     </div>
   );
 }
