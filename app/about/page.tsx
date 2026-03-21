@@ -136,21 +136,25 @@ export default function AboutPage() {
             <div className="activity-monitor__container">
               <h3 className="about-stats__label" style={{ marginBottom: '3rem' }}>Activity Monitor</h3>
               <div className="activity-monitor__grid">
-                {github.contributionCalendar.slice(-371).map((day: any, i: number) => (
+                {github.contributionCalendar.slice(-150).map((day: any, i: number) => (
                   <div 
                     key={i}
                     className="activity-monitor__day"
                     title={`${day.date}: ${day.count} contributions`}
                     style={{
                       background: day.level === 0 ? '#eee' : 
-                                  day.level === 1 ? '#d1d5db' :
-                                  day.level === 2 ? '#9ca3af' :
-                                  day.level === 3 ? '#4b5563' : '#000'
+                                  day.level === 1 ? 'rgba(0,0,0,0.1)' :
+                                  day.level === 2 ? 'rgba(0,0,0,0.3)' :
+                                  day.level === 3 ? 'rgba(0,0,0,0.6)' : '#000'
                     }}
                   />
                 ))}
               </div>
-              <p style={{ marginTop: '1.5rem', fontSize: '0.65rem', opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              <div className="activity-monitor__meta">
+                 <span>{github.contributionCalendar[github.contributionCalendar.length - 150]?.date}</span>
+                 <span>Today</span>
+              </div>
+              <p style={{ marginTop: '2rem', fontSize: '0.65rem', opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                 Real-time frequency synced via GitHub GraphQL
               </p>
             </div>
@@ -199,6 +203,12 @@ export default function AboutPage() {
            </div>
         </footer>
       </main>
+
+      <style jsx global>{`
+        .about-view {
+          font-family: var(--font-sans, sans-serif);
+        }
+      `}</style>
     </div>
   );
 }
