@@ -13,7 +13,7 @@ export default function Header() {
   if (pathname.startsWith('/admin')) return null;
 
   return (
-    <header className="landing__header" style={{ position: 'fixed', zIndex: 1000, width: '100%' }}>
+    <header className="landing__header" style={{ position: 'fixed', zIndex: 1000, width: '90%', left: '50%', transform: 'translateX(-50%)', top: '1.5rem' }}>
       <Link href="/" className="landing__brand" style={{ textDecoration: 'none', color: 'inherit' }}>
         NISCHAY SHARMA
       </Link>
