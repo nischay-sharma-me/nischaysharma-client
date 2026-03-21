@@ -21,15 +21,16 @@ export default function AboutPage() {
     try {
       setLoading(true);
       const token = await auth.currentUser?.getIdToken();
-      if (!token) {
-        // Fallback to fetching a public profile if not logged in
-        // For now, we assume user is managing their own instance
-        setLoading(false);
-        return;
+      
+      let res;
+      if (token) {
+        res = await usersService.getMe(token);
+      } else {
+        // Fetch public admin profile if not logged in
+        res = await usersService.getPublicAdmin();
       }
 
-      const res = await usersService.getMe(token);
-      if (res.success) {
+      if (res && res.success) {
         setProfile(res.data);
       }
     } catch (err) {
