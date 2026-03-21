@@ -9,7 +9,6 @@ import { format, parseISO } from 'date-fns';
 import ActivityHeatmap from '@/components/ui/ActivityHeatmap';
 
 export default function AboutPage() {
-  const { isMenuOpen, toggleMenu } = useStore();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
