@@ -103,10 +103,10 @@ export default function AboutPage() {
                     className="activity-monitor__day"
                     title={`${day.date}: ${day.count} contributions`}
                     style={{
-                      background: day.level === 0 ? '#f5f5f5' : 
-                                  day.level === 1 ? '#d1d5db' :
-                                  day.level === 2 ? '#9ca3af' :
-                                  day.level === 3 ? '#4b5563' : '#000'
+                      background: day.level === 0 ? '#eee' : 
+                                  day.level === 1 ? 'rgba(0,0,0,0.1)' :
+                                  day.level === 2 ? 'rgba(0,0,0,0.3)' :
+                                  day.level === 3 ? 'rgba(0,0,0,0.6)' : '#000'
                     }}
                   />
                 ))}
@@ -118,10 +118,10 @@ export default function AboutPage() {
             <span>Synced via GitHub GraphQL</span>
             <div className="activity-monitor__legend">
               <span style={{ opacity: 0.5 }}>Less</span>
-              <span style={{ background: '#f5f5f5', border: '1px solid #eee' }} />
-              <span style={{ background: '#d1d5db' }} />
-              <span style={{ background: '#9ca3af' }} />
-              <span style={{ background: '#4b5563' }} />
+              <span style={{ background: '#eee' }} />
+              <span style={{ background: 'rgba(0,0,0,0.1)' }} />
+              <span style={{ background: 'rgba(0,0,0,0.3)' }} />
+              <span style={{ background: 'rgba(0,0,0,0.6)' }} />
               <span style={{ background: '#000' }} />
               <span style={{ opacity: 0.5 }}>More</span>
             </div>
