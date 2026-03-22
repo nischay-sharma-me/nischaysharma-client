@@ -136,13 +136,11 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
 
         .docs-sidebar__list {
           list-style: none;
-          padding: 0.5rem 0 1rem 0.75rem;
+          padding: 0.5rem 0 1rem 0;
           margin: 0;
           display: flex;
           flex-direction: column;
           overflow: hidden;
-          border-left: 1px solid #f0f0f0;
-          margin-left: 4px;
         }
 
         .docs-sidebar__item {
@@ -150,8 +148,9 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
         }
 
         .docs-sidebar__link {
+          color: #000;
+          white-space: nowrap;
           font-size: 0.8rem;
-          color: #888;
           text-decoration: none;
           transition: all 0.2s ease;
           display: flex;
@@ -159,6 +158,7 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
           gap: 0.75rem;
           padding: 0.5rem 0;
           line-height: 1.4;
+          font-weight: 500;
         }
 
         .docs-sidebar__bullet {
@@ -169,8 +169,8 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
         }
 
         .docs-sidebar__link:hover {
-          color: #000;
-          transform: translateX(2px);
+          opacity: 0.6;
+          transform: translateX(4px);
         }
 
         .docs-sidebar__link:hover .docs-sidebar__bullet {
@@ -179,8 +179,7 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
         }
 
         .docs-sidebar__link.is-active {
-          color: #000;
-          font-weight: 700;
+          font-weight: 800;
         }
 
         .docs-sidebar__link.is-active .docs-sidebar__bullet {
