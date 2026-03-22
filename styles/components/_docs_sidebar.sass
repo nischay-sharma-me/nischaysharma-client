@@ -3,17 +3,25 @@
 
 .docs-sidebar
   width: 260px
-  height: calc(100vh - 100px)
+  max-height: calc(100vh - 120px)
   position: sticky
   top: 100px
   padding: 0 1.5rem 4rem 0
   overflow-y: auto
+  scrollbar-width: thin
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent
+  z-index: 10
 
   &::-webkit-scrollbar
     width: 4px
+  &::-webkit-scrollbar-track
+    background: transparent
   &::-webkit-scrollbar-thumb
-    background: #333
+    background: rgba(255, 255, 255, 0.2)
     border-radius: 2px
+
+  &__inner
+    padding-bottom: 2rem
 
   &__section
     margin-bottom: 0.5rem
