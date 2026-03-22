@@ -43,7 +43,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         lineColor: '#ffffff',
         secondaryColor: '#222222',
         tertiaryColor: '#1a1a1a',
-        fontSize: '14px',
+        fontSize: '11px',
         mainBkg: '#000000',
         nodeBorder: '#ffffff',
         clusterBkg: '#0a0a0a',
@@ -53,7 +53,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       },
       flowchart: {
         curve: 'basis',
-        padding: 40,
+        padding: 20,
         useMaxWidth: false,
         htmlLabels: true
       },
