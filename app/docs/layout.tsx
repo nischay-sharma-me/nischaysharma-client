@@ -33,21 +33,38 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     mermaid.initialize({
       startOnLoad: true,
-      theme: 'base',
+      theme: 'neutral',
+      securityLevel: 'loose',
+      fontFamily: 'Poppins, system-ui, sans-serif',
       themeVariables: {
-        primaryColor: '#000',
-        primaryTextColor: '#fff',
-        primaryBorderColor: '#000',
-        lineColor: '#333',
-        secondaryColor: '#f5f5f5',
-        tertiaryColor: '#fff'
+        primaryColor: '#ffffff',
+        primaryTextColor: '#000000',
+        primaryBorderColor: '#000000',
+        lineColor: '#000000',
+        secondaryColor: '#f9f9f9',
+        tertiaryColor: '#ffffff',
+        fontSize: '14px',
+        mainBkg: '#ffffff',
+        nodeBorder: '#000000',
+        clusterBkg: '#fcfcfc',
+        clusterBorder: '#eee',
+        titleColor: '#000000',
+        edgeLabelBackground: '#ffffff'
+      },
+      flowchart: {
+        curve: 'basis',
+        padding: 20
+      },
+      sequence: {
+        actorMargin: 50,
+        mirrorActors: false
       }
     });
     
     // Use a small delay to ensure DOM is ready
     const timeout = setTimeout(() => {
       mermaid.contentLoaded();
-    }, 100);
+    }, 150);
     
     return () => clearTimeout(timeout);
   }, [pathname, loading]);

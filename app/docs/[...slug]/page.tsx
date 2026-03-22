@@ -56,7 +56,7 @@ export default function DocPage() {
          <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#a3a3a3', display: 'block', marginBottom: '1rem' }}>
            Documentation / {Array.isArray(slug) ? slug[0] : ''}
          </span>
-         <h1>{data?.title}</h1>
+         {/* <h1>{data?.title}</h1> */}
       </header>
       
       <div dangerouslySetInnerHTML={{ __html: data?.content || '' }} />
