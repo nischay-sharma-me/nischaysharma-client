@@ -43,34 +43,35 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         lineColor: '#ffffff',
         secondaryColor: '#222222',
         tertiaryColor: '#1a1a1a',
-        fontSize: '11px',
+        fontSize: '10px',
         mainBkg: '#000000',
         nodeBorder: '#ffffff',
         clusterBkg: '#0a0a0a',
         clusterBorder: '#333',
         titleColor: '#ffffff',
         edgeLabelBackground: '#000000'
-      },
-      flowchart: {
+        },
+        flowchart: {
         curve: 'basis',
-        padding: 20,
-        useMaxWidth: false,
+        padding: 15,
+        useMaxWidth: true,
         htmlLabels: true
-      },
-      sequence: {
-        actorMargin: 50,
+        },
+        sequence: {
+        actorMargin: 40,
         mirrorActors: false,
-        useMaxWidth: false,
+        useMaxWidth: true,
         rightAngles: false,
         showSequenceNumbers: false
-      },
-      er: {
-        useMaxWidth: false,
+        },
+        er: {
+        useMaxWidth: true,
         layoutDirection: 'TB',
-        minEntityWidth: 100,
-        minEntityHeight: 75
-      }
-    });
+        minEntityWidth: 80,
+        minEntityHeight: 60
+        }
+        });
+
     
     // Use a small delay to ensure DOM is ready and styles are applied
     const timeout = setTimeout(() => {
