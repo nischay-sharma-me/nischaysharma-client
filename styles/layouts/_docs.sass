@@ -152,20 +152,23 @@
   .mermaid
     background: #0a0a0a !important
     margin: 6rem 0
-    display: block
     padding: 3rem
     border: 1px solid #222
     border-radius: 12px
     overflow-x: auto
-    text-align: center
-    // Allow diagram to be wider than the 800px text container if necessary
+    display: flex
+    flex-direction: column
+    align-items: center
     width: 100%
 
     svg
-      display: inline-block
-      // Remove constraints to allow full-scale rendering
+      flex-shrink: 0
+      display: block
       max-width: none !important
       height: auto !important
+      margin: 0 auto
+      // Add buffer padding to the SVG itself to prevent label clipping
+      padding: 0 4rem 
       transition: transform 0.3s ease
 
       &:hover
