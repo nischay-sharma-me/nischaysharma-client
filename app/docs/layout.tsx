@@ -13,8 +13,8 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
     const fetchNav = async () => {
       try {
         const res = await docsService.getNavigation();
-        if (res.success) {
-          setNavigation(res.data);
+        if (res.success && res.data.navigation) {
+          setNavigation(res.data.navigation);
         }
       } catch (err) {
         console.error('Failed to fetch docs navigation:', err);

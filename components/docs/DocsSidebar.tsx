@@ -15,7 +15,7 @@ export default function DocsSidebar({ navigation }: DocsSidebarProps) {
   return (
     <aside className="docs-sidebar">
       <div className="docs-sidebar__inner">
-        {navigation.map((section) => (
+        {Array.isArray(navigation) && navigation.map((section) => (
           <div key={section.section} className="docs-sidebar__section">
             <h4 className="docs-sidebar__label">{section.section}</h4>
             <ul className="docs-sidebar__list">
