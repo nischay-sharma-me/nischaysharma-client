@@ -5,135 +5,183 @@
   position: fixed
   inset: 0
   z-index: 100
-  background-color: #fdfdfb // Newspaper-like off-white
+  background-color: #f9f7f1 // Aged newspaper paper color
   overflow-y: auto
-  display: flex
-  flex-direction: column
-  padding: 4rem 1rem
+  padding: 2rem 1rem
+  color: $color-black
   
   @media (min-width: 768px)
-    padding: 6rem 4rem
+    padding: 4rem 3rem
 
   &__container
-    max-width: 1200px
+    max-width: 1400px
     margin: 0 auto
-    width: 100%
+    border: 1px solid rgba($color-black, 0.2)
+    padding: 1.5rem
+    background-color: #fdfdfb
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05)
 
   &__header
     text-align: center
-    border-bottom: 4px double $color-black
-    margin-bottom: 3rem
-    padding-bottom: 1rem
+    border-bottom: 3px solid $color-black
+    margin-bottom: 2rem
+    padding-bottom: 0.5rem
+
+  &__weather
+    display: flex
+    justify-content: space-between
+    font-family: $font-sans
+    font-size: 0.65rem
+    text-transform: uppercase
+    letter-spacing: 1px
+    border-bottom: 1px solid rgba($color-black, 0.1)
+    padding-bottom: 0.5rem
+    margin-bottom: 1rem
 
   &__title
     font-family: $font-serif
-    font-size: 3.5rem
-    @media (min-width: 768px)
-      font-size: 5rem
+    font-size: clamp(2.5rem, 8vw, 6rem)
     text-transform: uppercase
-    letter-spacing: -2px
-    font-weight: 700
+    letter-spacing: -3px
+    font-weight: 800
     margin: 0
-    line-height: 1
+    line-height: 0.85
+    border-bottom: 1px solid $color-black
+    padding-bottom: 1rem
 
   &__meta
     display: flex
     justify-content: space-between
     font-family: $font-sans
-    font-size: 0.75rem
+    font-size: 0.7rem
     text-transform: uppercase
-    letter-spacing: 1px
-    margin-top: 1rem
-    font-weight: 600
+    letter-spacing: 1.5px
+    margin-top: 0.75rem
+    font-weight: 700
 
-  &__articles
-    display: block
+  &__grid
+    display: grid
+    gap: 2rem
+    
     @media (min-width: 768px)
-      column-count: 2
-      column-gap: 3rem
-      column-rule: 1px solid rgba($color-black, 0.1)
-    
-    @media (min-width: 1024px)
-      column-count: 3
-
-  &__article
-    break-inside: avoid
-    margin-bottom: 3rem
-    padding-bottom: 2rem
-    border-bottom: 1px solid rgba($color-black, 0.1)
-    
-    &:last-child
-      border-bottom: none
-
-  &__article-link
-    text-decoration: none
-    color: $color-black
+      grid-template-columns: 2fr 1.2fr 1fr
+      
+  &__middle-column
     display: flex
     flex-direction: column
-    gap: 1rem
+    gap: 2rem
+    border-left: 1px solid rgba($color-black, 0.1)
+    border-right: 1px solid rgba($color-black, 0.1)
+    padding: 0 1.5rem
 
-  &__article-image
-    width: 100%
-    aspect-ratio: 16/9
-    background-color: #eee
+    @media (max-width: 767px)
+      border: none
+      padding: 0
+
+  &__side-column
     display: flex
-    align-items: center
-    justify-content: center
-    border: 1px solid rgba($color-black, 0.05)
+    flex-direction: column
+    gap: 1.5rem
+
+  &__item
+    &--lead
+      .menu__headline
+        font-size: clamp(2rem, 4vw, 3.5rem)
+        margin-top: 1rem
+        
+      .menu__image-box
+        width: 100%
+        aspect-ratio: 16/9
+        background: #eee
+        display: flex
+        align-items: center
+        justify-content: center
+        border: 1px solid rgba($color-black, 0.1)
+
+    &--mini
+      border-bottom: 1px dashed rgba($color-black, 0.2)
+      padding-bottom: 1rem
+      
+      &:last-child
+        border-bottom: none
+        
+      .menu__headline
+        font-size: 1.15rem
+        font-style: italic
+
+  &__link
+    text-decoration: none
+    color: inherit
+    display: block
     
-    .menu__article-link:hover &
-      filter: grayscale(1)
+    &:hover
+      .menu__headline
+        text-decoration: underline
+      .menu__image-box
+        filter: sepia(0.5) contrast(1.2)
 
-  &__article-placeholder
+  &__label
+    display: inline-block
+    background-color: $color-black
+    color: white
     font-family: $font-sans
-    font-size: 0.75rem
-    color: $color-text-muted
+    font-size: 0.65rem
+    padding: 0.2rem 0.5rem
     text-transform: uppercase
+    letter-spacing: 1px
+    margin-bottom: 0.75rem
 
-  &__article-headline
+  &__headline
     font-family: $font-serif
-    font-size: 1.75rem
+    font-size: 1.6rem
     line-height: 1.1
-    font-weight: 700
-    margin: 0
-    @include transition(color)
-    
-    .menu__article-link:hover &
-      text-decoration: underline
+    font-weight: 800
+    margin: 0.5rem 0
+    letter-spacing: -0.5px
 
-  &__article-summary
+  &__summary
     font-family: $font-sans
-    font-size: 0.9375rem
-    line-height: 1.5
-    color: #444
+    font-size: 0.9rem
+    line-height: 1.45
+    color: #333
     margin: 0
+    text-align: justify
 
-  &__article-more
+  &__placeholder
     font-family: $font-sans
-    font-size: 0.75rem
-    font-weight: 700
+    font-size: 0.7rem
     text-transform: uppercase
-    color: $color-black
+    color: #999
+
+  &__ad
+    margin-top: auto
+    border: 2px solid $color-black
+    padding: 1rem
+    text-align: center
+    font-family: $font-serif
+    font-weight: 700
+    font-size: 0.75rem
+    background: #f0f0f0
 
   &__footer
-    margin-top: auto
-    padding: 3rem 0
-    border-top: 4px double $color-black
-    display: flex
-    justify-content: center
+    margin-top: 4rem
+    border-top: 3px double $color-black
+    padding-top: 2rem
+    text-align: center
 
   &__socials
     display: flex
-    gap: 2rem
+    justify-content: center
+    gap: 3rem
 
   &__social-link
-    font-size: 0.75rem
+    font-size: 0.7rem
     font-family: $font-sans
     letter-spacing: 2px
     color: $color-black
     text-transform: uppercase
     text-decoration: none
-    font-weight: 600
+    font-weight: 700
     
     &:hover
       text-decoration: underline
