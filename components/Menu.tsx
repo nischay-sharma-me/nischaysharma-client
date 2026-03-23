@@ -8,13 +8,15 @@ interface MenuProps {
   onClose: () => void;
 }
 
-const menuItems = [
-  { label: 'Home', href: '/' },
-  { label: 'About', href: '/about' },
-  { label: 'Docs', href: '/docs' },
-  { label: 'Skills', href: '/#skills' },
-  { label: 'Blogs', href: '/#blogs' },
-  { label: 'Contact', href: '/#contact' },
+const newsItems = [
+  { id: 1, headline: 'The Future of Web Development', summary: 'Exploring new paradigms in React and Next.js for 2026.', href: '/' },
+  { id: 2, headline: 'Mastering Framer Motion', summary: 'How to create buttery smooth animations that feel native.', href: '/about' },
+  { id: 3, headline: 'System Architecture 101', summary: 'Building scalable and resilient systems from scratch.', href: '/docs' },
+  { id: 4, headline: 'The Art of UI/UX', summary: 'Why design matters more than ever in backend heavy applications.', href: '/#skills' },
+  { id: 5, headline: 'Engineering Leadership', summary: 'Lessons learned from leading high performance teams.', href: '/#blogs' },
+  { id: 6, headline: 'Database Deep Dive', summary: 'Understanding NoSQL vs SQL trade-offs in modern apps.', href: '/#contact' },
+  { id: 7, headline: 'Open Source Journey', summary: 'How contributing to open source accelerates your career.', href: '/' },
+  { id: 8, headline: 'Beyond the Code', summary: 'The soft skills every senior developer needs to succeed.', href: '/about' },
 ];
 
 export default function Menu({ isOpen, onClose }: MenuProps) {
@@ -28,31 +30,43 @@ export default function Menu({ isOpen, onClose }: MenuProps) {
           transition={{ duration: 0.3, ease: 'easeInOut' }}
           className="menu"
         >
-          <nav className="menu__nav">
-            {menuItems.map((item, index) => (
-              <motion.div
-                key={item.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-              >
-                <Link
-                  href={item.href}
-                  onClick={onClose}
-                  className="menu__link"
+          <div className="menu__scroll-container">
+            <nav className="menu__nav">
+              {newsItems.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  className="menu__column"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 * index }}
                 >
-                  {item.label}
-                </Link>
-              </motion.div>
-            ))}
-          </nav>
+                  <Link
+                    href={item.href}
+                    onClick={onClose}
+                    className="menu__link"
+                  >
+                    <div className="menu__image-placeholder">
+                      {/* Placeholder for future images */}
+                      <span className="menu__image-text">Image {item.id}</span>
+                    </div>
+                    <div className="menu__content">
+                      <h2 className="menu__headline">{item.headline}</h2>
+                      <p className="menu__summary">{item.summary}</p>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </nav>
+          </div>
 
-          <div className="menu__socials">
-            {['Instagram', 'LinkedIn', 'Twitter'].map((social) => (
-              <a key={social} href="#" className="menu__social-link">
-                {social}
-              </a>
-            ))}
+          <div className="menu__footer">
+            <div className="menu__socials">
+              {['Instagram', 'LinkedIn', 'Twitter'].map((social) => (
+                <a key={social} href="#" className="menu__social-link">
+                  {social}
+                </a>
+              ))}
+            </div>
           </div>
         </motion.div>
       )}
