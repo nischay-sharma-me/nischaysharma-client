@@ -5,111 +5,135 @@
   position: fixed
   inset: 0
   z-index: 100
-  background-color: rgba(255, 255, 255, 0.98)
-  backdrop-filter: blur(12px)
+  background-color: #fdfdfb // Newspaper-like off-white
+  overflow-y: auto
   display: flex
   flex-direction: column
-  padding-top: 6rem // Space for header
+  padding: 4rem 1rem
   
-  &__scroll-container
-    flex: 1
+  @media (min-width: 768px)
+    padding: 6rem 4rem
+
+  &__container
+    max-width: 1200px
+    margin: 0 auto
     width: 100%
-    overflow-x: auto // Enable horizontal scrolling
-    overflow-y: hidden
-    padding: 0 2rem
-    
-    // Hide scrollbar but keep functionality
-    scrollbar-width: none
-    &::-webkit-scrollbar
-      display: none
 
-  &__nav
-    display: flex
-    gap: 2rem
-    height: 100%
-    padding-bottom: 2rem
-    width: max-content // Ensure container expands to fit all columns horizontally
+  &__header
+    text-align: center
+    border-bottom: 4px double $color-black
+    margin-bottom: 3rem
+    padding-bottom: 1rem
 
-  &__column
-    flex: 0 0 300px // Fixed width for each "newspaper column"
-    display: flex
-    flex-direction: column
-    height: 100%
-    border-right: 1px solid rgba($color-black, 0.1)
-    padding-right: 2rem
-    
-    &:last-child
-      border-right: none
-      padding-right: 0
+  &__title
+    font-family: $font-serif
+    font-size: 3.5rem
+    @media (min-width: 768px)
+      font-size: 5rem
+    text-transform: uppercase
+    letter-spacing: -2px
+    font-weight: 700
+    margin: 0
+    line-height: 1
 
-  &__link
+  &__meta
     display: flex
-    flex-direction: column
-    height: 100%
-    text-decoration: none
-    color: $color-black
-    
-  &__image-placeholder
-    width: 100%
-    aspect-ratio: 4/3
-    background-color: #f0f0f0
-    display: flex
-    align-items: center
-    justify-content: center
-    margin-bottom: 1.5rem
-    border: 1px solid rgba($color-black, 0.05)
-    @include transition(opacity)
-    
-    .menu__link:hover &
-      opacity: 0.8
-      
-  &__image-text
-    color: $color-text-muted
-    font-size: 0.875rem
+    justify-content: space-between
     font-family: $font-sans
+    font-size: 0.75rem
     text-transform: uppercase
     letter-spacing: 1px
+    margin-top: 1rem
+    font-weight: 600
 
-  &__content
+  &__articles
+    display: block
+    @media (min-width: 768px)
+      column-count: 2
+      column-gap: 3rem
+      column-rule: 1px solid rgba($color-black, 0.1)
+    
+    @media (min-width: 1024px)
+      column-count: 3
+
+  &__article
+    break-inside: avoid
+    margin-bottom: 3rem
+    padding-bottom: 2rem
+    border-bottom: 1px solid rgba($color-black, 0.1)
+    
+    &:last-child
+      border-bottom: none
+
+  &__article-link
+    text-decoration: none
+    color: $color-black
     display: flex
     flex-direction: column
     gap: 1rem
 
-  &__headline
+  &__article-image
+    width: 100%
+    aspect-ratio: 16/9
+    background-color: #eee
+    display: flex
+    align-items: center
+    justify-content: center
+    border: 1px solid rgba($color-black, 0.05)
+    
+    .menu__article-link:hover &
+      filter: grayscale(1)
+
+  &__article-placeholder
+    font-family: $font-sans
+    font-size: 0.75rem
+    color: $color-text-muted
+    text-transform: uppercase
+
+  &__article-headline
     font-family: $font-serif
-    font-size: 1.5rem
-    line-height: 1.2
-    font-weight: 400
-    color: $color-black
+    font-size: 1.75rem
+    line-height: 1.1
+    font-weight: 700
+    margin: 0
     @include transition(color)
     
-    .menu__link:hover &
-      color: #E57373
+    .menu__article-link:hover &
+      text-decoration: underline
 
-  &__summary
+  &__article-summary
     font-family: $font-sans
-    font-size: 0.875rem
-    line-height: 1.6
-    color: $color-text-muted
+    font-size: 0.9375rem
+    line-height: 1.5
+    color: #444
+    margin: 0
+
+  &__article-more
+    font-family: $font-sans
+    font-size: 0.75rem
+    font-weight: 700
+    text-transform: uppercase
+    color: $color-black
 
   &__footer
-    padding: 2rem
-    border-top: 1px solid rgba($color-black, 0.1)
+    margin-top: auto
+    padding: 3rem 0
+    border-top: 4px double $color-black
     display: flex
     justify-content: center
-    background-color: rgba(255, 255, 255, 0.98)
 
   &__socials
     display: flex
     gap: 2rem
 
   &__social-link
-    font-size: 0.625rem
+    font-size: 0.75rem
+    font-family: $font-sans
     letter-spacing: 2px
-    color: $color-text-muted
+    color: $color-black
     text-transform: uppercase
     text-decoration: none
-    @include transition(color)
-
+    font-weight: 600
+    
     &:hover
-      color: $color-black
+      text-decoration: underline

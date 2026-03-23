@@ -30,12 +30,21 @@ export default function Menu({ isOpen, onClose }: MenuProps) {
           transition={{ duration: 0.3, ease: 'easeInOut' }}
           className="menu"
         >
-          <div className="menu__scroll-container">
-            <nav className="menu__nav">
+          <div className="menu__container">
+            <header className="menu__header">
+              <h1 className="menu__title">The Daily Digital</h1>
+              <div className="menu__meta">
+                <span>Vol. I — No. 001</span>
+                <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                <span>Price: Free</span>
+              </div>
+            </header>
+
+            <nav className="menu__articles">
               {newsItems.map((item, index) => (
                 <motion.div
                   key={item.id}
-                  className="menu__column"
+                  className="menu__article"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.05 * index }}
@@ -43,15 +52,15 @@ export default function Menu({ isOpen, onClose }: MenuProps) {
                   <Link
                     href={item.href}
                     onClick={onClose}
-                    className="menu__link"
+                    className="menu__article-link"
                   >
-                    <div className="menu__image-placeholder">
-                      {/* Placeholder for future images */}
-                      <span className="menu__image-text">Image {item.id}</span>
+                    <div className="menu__article-image">
+                      <span className="menu__article-placeholder">Image {item.id}</span>
                     </div>
-                    <div className="menu__content">
-                      <h2 className="menu__headline">{item.headline}</h2>
-                      <p className="menu__summary">{item.summary}</p>
+                    <div className="menu__article-body">
+                      <h2 className="menu__article-headline">{item.headline}</h2>
+                      <p className="menu__article-summary">{item.summary}</p>
+                      <span className="menu__article-more">Read More &rarr;</span>
                     </div>
                   </Link>
                 </motion.div>
