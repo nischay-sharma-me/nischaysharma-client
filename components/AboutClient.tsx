@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import ActivityHeatmap from '@/components/ui/ActivityHeatmap';
+import ActivityHeatmap, { ActivityDay } from '@/components/ui/ActivityHeatmap';
 
 interface GitHubStats {
   totalRepos: number;
@@ -41,7 +41,7 @@ interface Profile {
     github?: {
       stats: GitHubStats;
       languages?: Language[];
-      contributionCalendar?: unknown[];
+      contributionCalendar?: ActivityDay[];
     };
     linkedin?: {
       positions?: Position[];

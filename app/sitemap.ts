@@ -25,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (articlesRes.success && Array.isArray(articlesRes.data)) {
       articleRoutes = articlesRes.data.map((article) => ({
         url: `${baseUrl}/articles/${article.slug}`,
-        lastModified: new Date(article.updatedAt || article.publishedAt || new Date()),
+        lastModified: new Date(article.publishedAt || new Date()),
         changeFrequency: 'weekly' as const,
         priority: 0.6,
       }));

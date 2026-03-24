@@ -95,7 +95,7 @@ export default async function PublicArticleView({ params }: PageProps) {
     "description": article.description,
     "image": getCoverImage(article),
     "datePublished": article.publishedAt,
-    "dateModified": article.updatedAt || article.publishedAt,
+    "dateModified": article.publishedAt,
     "author": {
       "@type": "Person",
       "name": "Nischay Sharma",
