@@ -16,7 +16,9 @@ export interface Book {
   status: 'draft' | 'published';
   type: 'book' | 'paper';
   chapters: Chapter[];
-  metadata: Record<string, any>;
+  pages?: Page[];
+  allPages?: Page[];
+  metadata: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
@@ -111,6 +113,17 @@ export const booksService = {
     return apiFetch<{ success: boolean; data: Page[] }>(`/books/${bookId}/pages`, {
       method: 'GET',
       token,
+    });
+  },
+
+  /**
+   * Add a new page to a book
+   */
+  createPage: (bookId: string, data: { chapterId?: string; content: string }, token: string) => {
+    return apiFetch<{ success: boolean; data: Page }>(`/books/${bookId}/pages`, {
+      method: 'POST',
+      token,
+      body: data,
     });
   },
 
