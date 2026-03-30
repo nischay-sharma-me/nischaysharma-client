@@ -1,16 +1,43 @@
 'use server';
 
 import { postsService } from '@/services/posts.service';
-import { Post } from '@/lib/types/post';
 import { ActionResponse } from '@/lib/types/common';
+import { cookies } from 'next/headers';
 
-export async function listPostsAction(options = {}): Promise<ActionResponse<Post[]>> {
+async function getAuthToken() {
+  const cookieStore = await cookies();
+  return cookieStore.get('firebase-token')?.value;
+}
+
+export async function listPostsAction(): Promise<ActionResponse> {
   try {
-    return await postsService.listPosts(options);
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'An unknown error occurred',
-    };
+    const token = await getAuthToken();
+    if (!token) return { success: false, error: 'Unauthorized' };
+    return await postsService.listPosts({}, token);
+  } catch (error: any) {
+    console.error('Server Action Error (listPosts):', error);
+    return { success: false, error: error.message || 'Failed to list posts' };
+  }
+}
+
+export async function deletePostAction(id: string): Promise<ActionResponse> {
+  try {
+    const token = await getAuthToken();
+    if (!token) return { success: false, error: 'Unauthorized' };
+    return await postsService.deletePost(id, token);
+  } catch (error: any) {
+    console.error('Server Action Error (deletePost):', error);
+    return { success: false, error: error.message || 'Failed to delete post' };
+  }
+}
+
+export async function publishPostAction(id: string, platforms: string[]): Promise<ActionResponse> {
+  try {
+    const token = await getAuthToken();
+    if (!token) return { success: false, error: 'Unauthorized' };
+    return await postsService.publishPost(id, platforms, token);
+  } catch (error: any) {
+    console.error('Server Action Error (publishPost):', error);
+    return { success: false, error: error.message || 'Failed to publish post' };
   }
 }

@@ -65,7 +65,7 @@ export default function PostsClient({ initialPosts }: PostsClientProps) {
       title: 'Delete Post',
       message: 'Are you sure you want to delete this post? This action cannot be undone.',
       confirmLabel: 'Delete',
-      confirmVariant: 'danger',
+      variant: 'danger',
       onConfirm: async () => {
         const success = await deletePost(id);
         if (success) {

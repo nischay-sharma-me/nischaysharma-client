@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { articlesService } from '@/services/articles.service';
 import { booksService } from '@/services/books.service';
 import { usePostsStore } from '@/store/admin/usePostsStore';
+import { auth } from '@/lib/firebase';
 import { toast } from 'sonner';
 
 interface PostGeneratorFormProps {
@@ -31,9 +32,12 @@ export const PostGeneratorForm = ({ onSuccess, onClose }: PostGeneratorFormProps
 
   const fetchContent = async () => {
     try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+
       const [articlesRes, booksRes] = await Promise.all([
         articlesService.listArticles({ limit: 100 }),
-        booksService.listBooks()
+        booksService.getUserBooks(token)
       ]);
       
       if (articlesRes.success) setArticles(articlesRes.data || []);
