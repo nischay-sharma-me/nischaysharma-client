@@ -25,8 +25,8 @@ export default async function ArticlesIndexPage() {
   let pagination = undefined;
 
   try {
-    // Try simple fetch first to ensure we get something if advanced params are not supported
-    const response = await articlesService.getTopArticles(50);
+    // Fetch a larger set for frontend-side filtering and search
+    const response = await articlesService.getTopArticles(200);
 
     if (response.success && response.data) {
       articles = response.data;
@@ -39,7 +39,6 @@ export default async function ArticlesIndexPage() {
   return (
     <ArticlesIndexClient 
       initialArticles={articles} 
-      initialPagination={pagination} 
     />
   );
 }
