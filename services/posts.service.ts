@@ -34,6 +34,21 @@ export const postsService = {
     });
   },
 
+  getPost: (postId: string, token: string): Promise<ActionResponse<Post>> => {
+    return apiFetch<ActionResponse<Post>>(`/posts/${postId}`, {
+      method: 'GET',
+      token,
+    });
+  },
+
+  updatePost: (postId: string, data: Partial<Post>, token: string): Promise<ActionResponse<Post>> => {
+    return apiFetch<ActionResponse<Post>>(`/posts/${postId}`, {
+      method: 'PATCH',
+      token,
+      body: data,
+    });
+  },
+
   publishPost: (postId: string, targetPlatforms: string[], token: string): Promise<ActionResponse<Post>> => {
     return apiFetch<ActionResponse<Post>>(`/posts/${postId}/publish`, {
       method: 'POST',

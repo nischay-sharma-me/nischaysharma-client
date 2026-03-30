@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Post } from '@/lib/types/post';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -44,6 +45,16 @@ export const PostRow = ({ post, onPublish, onDelete }: PostRowProps) => {
           {post.status || 'draft'}
         </Badge>
         <div style={{ display: 'flex', gap: '0.4rem' }}>
+          <Link href={`/admin/posts/${post.id}`}>
+            <Button variant="ghost" size="sm" title="Edit">
+              <i className="ph ph-pencil-line" style={{ fontSize: '1.2rem' }} />
+            </Button>
+          </Link>
+          <Link href={`/admin/posts/${post.id}/preview`}>
+            <Button variant="ghost" size="sm" title="Preview">
+              <i className="ph ph-eye" style={{ fontSize: '1.2rem' }} />
+            </Button>
+          </Link>
           {post.status !== 'published' && (
             <Button 
               variant="ghost" 
