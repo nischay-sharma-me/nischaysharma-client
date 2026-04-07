@@ -7,6 +7,7 @@ import RealtimeNotificationHandler from "@/components/RealtimeNotificationHandle
 import SplashLoader from "@/components/SplashLoader";
 import { Dialog } from "@/components/ui/Dialog";
 import NavigationWrapper from "@/components/NavigationWrapper";
+import { GoogleTagManager } from '@next/third-parties/google';
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -96,6 +97,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
+      <GoogleTagManager gtmId="GTM-NVGLQ2LM" />
       <head>
         <script src="https://unpkg.com/@phosphor-icons/web" async></script>
         <script
