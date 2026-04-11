@@ -92,15 +92,7 @@ export default function HomeClient({ articles }: { articles: Article[] }) {
       <div className="articles-parallax">
         {/* --- Hero Section --- */}
         <section className="landing" style={{ zIndex: 1, height: '100vh', position: 'relative', scrollSnapAlign: 'start' }}>
-          <video 
-            autoPlay 
-            muted 
-            loop 
-            playsInline 
-            className="landing__bg"
-          >
-            <source src="/architectural-concrete-monument.mp4" type="video/mp4" />
-          </video>
+          <div className="landing__bg" />
           
           <section className="landing__hero">
             <div className="landing__hero-wrapper">
