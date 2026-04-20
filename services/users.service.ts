@@ -35,6 +35,12 @@ export const usersService = {
     });
   },
 
+  getHomeData: () => {
+    return apiFetch<any>('/users/public/home', {
+      method: 'GET',
+    });
+  },
+
   updateMe: (data: { displayName?: string; bio?: string }, token: string) => {
     return apiFetch<any>('/users/me', {
       method: 'PATCH',

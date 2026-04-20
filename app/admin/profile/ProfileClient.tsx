@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { auth } from '@/lib/firebase';
 import { usersService } from '@/services/users.service';
+import { articlesService } from '@/services/articles.service';
+import { booksService } from '@/services/books.service';
 import { integrationsService, IntegrationsList } from '@/services/integrations.service';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -43,8 +45,13 @@ export default function ProfileClient() {
   const [socialLinks, setSocialLinks] = useState({ twitter: '', linkedin: '', github: '', website: '' });
   const [projects, setProjects] = useState<{title: string, description: string, link?: string}[]>([]);
   const [newProject, setNewProject] = useState({title: '', description: '', link: ''});
+  const [featured, setFeatured] = useState<{id: string, type: 'article' | 'book', title: string}[]>([]);
+  const [showFeaturedModal, setShowFeaturedModal] = useState(false);
+  const [availableItems, setAvailableItems] = useState<{id: string, type: 'article' | 'book', title: string}[]>([]);
+  const [loadingItems, setLoadingItems] = useState(false);
   const [configModal, setConfigModal] = useState<'github' | 'linkedin' | null>(null);
   const [tempConfig, setTempConfig] = useState({ clientId: '', clientSecret: '' });
+  const [featuredSearch, setFeaturedSearch] = useState('');
 
   useEffect(() => {
     fetchProfile();
@@ -82,6 +89,7 @@ export default function ProfileClient() {
         setExpertise(userData.expertise || []);
         setSocialLinks(userData.socialLinks || { twitter: '', linkedin: '', github: '', website: '' });
         setProjects(userData.projects || []);
+        setFeatured(userData.featured || []);
       }
     } catch (err) {
       console.error('Error fetching profile:', err);
@@ -247,7 +255,8 @@ export default function ProfileClient() {
         skills,
         expertise,
         socialLinks,
-        projects
+        projects,
+        featured
       } as any, token);
 
       if (response.success) {
@@ -339,6 +348,49 @@ export default function ProfileClient() {
     if (newProject.title.trim() && newProject.description.trim()) {
       setProjects([...projects, { ...newProject }]);
       setNewProject({ title: '', description: '', link: '' });
+    }
+  };
+
+  const fetchAvailableItems = async () => {
+    try {
+      setLoadingItems(true);
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+
+      const [articlesRes, booksRes] = await Promise.all([
+        articlesService.listArticles({ limit: 50 }, token),
+        booksService.getUserBooks(token)
+      ]);
+
+      const items: {id: string, type: 'article' | 'book', title: string}[] = [];
+      
+      if (articlesRes.success && Array.isArray(articlesRes.data)) {
+        articlesRes.data.forEach((a: any) => {
+          items.push({ id: a.id, type: 'article', title: a.title });
+        });
+      }
+
+      if (booksRes.success && Array.isArray(booksRes.data)) {
+        booksRes.data.forEach((b: any) => {
+          items.push({ id: b.id, type: 'book', title: b.title });
+        });
+      }
+
+      setAvailableItems(items);
+    } catch (err) {
+      console.error('Error fetching available items:', err);
+      toast.error('Failed to fetch available content');
+    } finally {
+      setLoadingItems(false);
+    }
+  };
+
+  const toggleFeaturedItem = (item: {id: string, type: 'article' | 'book', title: string}) => {
+    const isFeatured = featured.some(f => f.id === item.id);
+    if (isFeatured) {
+      setFeatured(featured.filter(f => f.id !== item.id));
+    } else {
+      setFeatured([...featured, item]);
     }
   };
 
@@ -444,6 +496,56 @@ export default function ProfileClient() {
                 placeholder="Tell us about yourself..."
                 maxLength={1000}
               />
+            </div>
+
+            <div className="form-divider" style={{ borderTop: '1px solid var(--color-border)', margin: '2rem 0' }}></div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 className="label" style={{ margin: 0, fontSize: '0.875rem' }}>Featured Content</h3>
+              <Button 
+                variant="secondary" 
+                style={{ fontSize: '0.7rem' }} 
+                onClick={() => {
+                  setShowFeaturedModal(true);
+                  fetchAvailableItems();
+                }}
+              >
+                <i className="ph ph-plus" style={{ marginRight: '0.4rem' }} />
+                Manage Featured
+              </Button>
+            </div>
+
+            <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+              Select items to feature on your home page (Articles, Books, etc.). They will appear in the order they are listed here.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+              {featured.length === 0 && <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', textAlign: 'center', padding: '1rem', background: 'var(--color-bg-tertiary)', borderRadius: '0.5rem' }}>No items featured yet.</p>}
+              {featured.map((item, index) => (
+                <div key={item.id} style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  padding: '0.75rem 1rem',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '0.5rem',
+                  background: 'var(--color-bg-primary)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span className={`badge ${item.type === 'article' ? 'badge--published' : 'badge--draft'}`} style={{ fontSize: '0.6rem', padding: '0.2rem 0.4rem' }}>
+                      {item.type.toUpperCase()}
+                    </span>
+                    <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{item.title}</span>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => toggleFeaturedItem(item)}
+                    style={{ background: 'none', border: 'none', color: 'var(--color-error)', cursor: 'pointer', padding: '0.2rem' }}
+                  >
+                    <i className="ph ph-trash" style={{ fontSize: '1rem' }} />
+                  </button>
+                </div>
+              ))}
             </div>
 
             <div className="form-divider" style={{ borderTop: '1px solid var(--color-border)', margin: '2rem 0' }}></div>
@@ -828,6 +930,106 @@ export default function ProfileClient() {
               <p style={{ fontSize: '0.65rem', color: '#a3a3a3', marginTop: '1.5rem', textAlign: 'center', lineHeight: 1.4 }}>
                 These keys are stored in your private profile and used only for your own OAuth connections.
               </p>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {showFeaturedModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-overlay"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 9999,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              backdropFilter: 'blur(10px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2rem'
+            }}
+            onClick={() => setShowFeaturedModal(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="card card--padded"
+              style={{ width: '100%', maxWidth: '500px', background: '#fff', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h3 className="label" style={{ margin: 0 }}>Manage Featured Content</h3>
+                <button onClick={() => setShowFeaturedModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                  <i className="ph ph-x" style={{ fontSize: '1.25rem' }} />
+                </button>
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <Input 
+                  placeholder="Search articles or books..."
+                  value={featuredSearch}
+                  onChange={(e) => setFeaturedSearch(e.target.value)}
+                  leftIcon={<i className="ph ph-magnifying-glass" />}
+                />
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', marginBottom: '1.5rem', paddingRight: '0.5rem' }}>
+                {loadingItems ? (
+                  <div style={{ textAlign: 'center', padding: '2rem' }}>
+                    <i className="ph ph-spinner animate-spin" style={{ fontSize: '1.5rem', opacity: 0.5 }} />
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {availableItems
+                      .filter(item => item.title.toLowerCase().includes(featuredSearch.toLowerCase()))
+                      .map(item => {
+                        const isFeatured = featured.some(f => f.id === item.id);
+                        return (
+                          <div 
+                            key={item.id} 
+                            onClick={() => toggleFeaturedItem(item)}
+                            style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '1rem', 
+                              padding: '0.75rem', 
+                              borderRadius: '0.5rem', 
+                              background: isFeatured ? 'var(--color-bg-tertiary)' : 'transparent',
+                              border: `1px solid ${isFeatured ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                          >
+                            <div style={{ 
+                              width: '18px', 
+                              height: '18px', 
+                              borderRadius: '4px', 
+                              border: '2px solid var(--color-primary)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              background: isFeatured ? 'var(--color-primary)' : 'transparent'
+                            }}>
+                              {isFeatured && <i className="ph ph-check" style={{ color: '#fff', fontSize: '0.75rem' }} />}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>{item.title}</div>
+                              <div style={{ fontSize: '0.65rem', opacity: 0.5, textTransform: 'uppercase' }}>{item.type}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+
+              <Button className="btn--full" onClick={() => setShowFeaturedModal(false)}>
+                Done ({featured.length} selected)
+              </Button>
             </motion.div>
           </motion.div>
         )}
