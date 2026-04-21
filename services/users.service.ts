@@ -122,5 +122,15 @@ export const usersService = {
       token,
       body: { assetUrl },
     });
+  },
+
+  uploadAsset: (file: File, folder: string, token: string) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiFetch<{ success: boolean; url: string }>(`/users/assets?folder=${folder}`, {
+      method: 'POST',
+      token,
+      body: formData,
+    });
   }
 };
