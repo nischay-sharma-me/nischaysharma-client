@@ -7,8 +7,13 @@ import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { Markdown } from '@tiptap/markdown';
+import Mermaid from './extensions/Mermaid';
 import { common, createLowlight } from 'lowlight';
 import React, { useEffect, useState } from 'react';
+import { usersService } from '@/services/users.service';
+import { useStore } from '@/store/useStore';
+import { toast } from 'sonner';
 
 const lowlight = createLowlight(common);
 
@@ -21,12 +26,19 @@ const TiptapEditor = ({ content, onChange }: TiptapEditorProps) => {
   const [isRawMode, setIsRawMode] = useState(false);
   const [rawHtml, setRawHtml] = useState(content);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const { user } = useStore();
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         codeBlock: false, // Disable default to use lowlight
       }),
+      Markdown.configure({
+        html: true,
+        tightLists: true,
+        bulletListMarker: '-',
+      }),
+      Mermaid,
       Image.configure({
         allowBase64: true,
         HTMLAttributes: {
@@ -58,8 +70,55 @@ const TiptapEditor = ({ content, onChange }: TiptapEditorProps) => {
       attributes: {
         class: 'tiptap-content',
       },
+      handlePaste: (view, event) => {
+        const items = Array.from(event.clipboardData?.items || []);
+        const imageItem = items.find(item => item.type.startsWith('image'));
+
+        if (imageItem && user) {
+          const file = imageItem.getAsFile();
+          if (file) {
+            handleImageUpload(file);
+            return true;
+          }
+        }
+        return false;
+      },
+      handleDrop: (view, event) => {
+        const items = Array.from(event.dataTransfer?.items || []);
+        const imageItem = items.find(item => item.type.startsWith('image'));
+
+        if (imageItem && user) {
+          const file = imageItem.getAsFile();
+          if (file) {
+            handleImageUpload(file);
+            return true;
+          }
+        }
+        return false;
+      }
     },
   });
+
+  const handleImageUpload = async (file: File) => {
+    if (!user || !editor) return;
+
+    try {
+      const token = await user.getIdToken();
+      toast.loading('Uploading image...', { id: 'upload-image' });
+      
+      const response = await usersService.uploadAsset(file, 'editor', token);
+      
+      if (response.success && response.url) {
+        editor.chain().focus().setImage({ src: response.url }).run();
+        toast.success('Image uploaded successfully', { id: 'upload-image' });
+      } else {
+        throw new Error('Upload failed');
+      }
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast.error('Failed to upload image', { id: 'upload-image' });
+    }
+  };
 
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
@@ -196,6 +255,16 @@ const TiptapEditor = ({ content, onChange }: TiptapEditorProps) => {
 
         {/* Code & Source */}
         <div className="editor-toolbar__group" style={{ marginLeft: 'auto' }}>
+          <button
+            onClick={() => (editor as any).chain().focus().toggleMermaid().run()}
+            className={editor.isActive('mermaid') ? 'is-active' : ''}
+            type="button"
+            title="Mermaid Diagram"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <i className="ph ph-tree-structure" />
+            <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>Mermaid</span>
+          </button>
           <button
             onClick={() => editor.chain().focus().toggleCodeBlock().run()}
             className={editor.isActive('codeBlock') ? 'is-active' : ''}
